@@ -78,14 +78,14 @@ def print_file(filepath, exe_path):
         jobs = []
         phandle = win32print.OpenPrinter(currentprinter)
         print_jobs = win32print.EnumJobs(phandle, 0, -1, 1,)
-        print(print_jobs)
+        # print(print_jobs)
         if print_jobs:
-            # for job in print_jobs:
-            #     if job['Status'] != 148:
+            for job in print_jobs:
+                if job['Status'] != 0 or job['Status'] != 8208:
                     jobs.extend(list(print_jobs))
                     for j in print_jobs:
                         print(j['Status'])
         win32print.ClosePrinter(phandle)
-
+    os.system("taskkill /im PDFtoPrinter.exe")
 
 
