@@ -20,7 +20,13 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
         broken = True
     if not broken:
         file_slave = PdfFileReader(slave_pdf_filepath, strict=False)
-        file_writer.appendPagesFromReader(file_main)
+        for i in range(len(file_main.pages)):
+            page = file_main.getPage(i)
+            # print(page.mediaBox)
+            if page.mediaBox[2] > page.mediaBox[3]:
+                file_writer.addPage(page.rotateClockwise(90))
+            else:
+                file_writer.addPage(page)
         file_writer.appendPagesFromReader(file_slave)
         outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
         with open(outpath, 'wb') as out:
@@ -77,15 +83,13 @@ def print_file(filepath, exe_path):
         time.sleep(0.01)
         jobs = []
         phandle = win32print.OpenPrinter(currentprinter)
-        print_jobs = win32print.EnumJobs(phandle, 0, -1, 1,)
+        print_jobs = win32print.EnumJobs(phandle, 0, -1, 1, )
         # print(print_jobs)
         if print_jobs:
             for job in print_jobs:
                 if job['Status'] != 0 or job['Status'] != 8208:
                     jobs.extend(list(print_jobs))
-                    for j in print_jobs:
-                        print(j['Status'])
+                    # for j in print_jobs:
+                    #     print(j['Status'])
+
         win32print.ClosePrinter(phandle)
-    os.system("taskkill /im PDFtoPrinter.exe")
-
-
