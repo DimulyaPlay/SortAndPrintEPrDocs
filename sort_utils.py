@@ -77,19 +77,28 @@ def print_file(filepath, exe_path):
     win32api.ShellExecute(0, 'open', exe_path,
                           '/s ' + filepath,
                           '.', 0)
-    jobs = [1]
-    time.sleep(1.5)
-    while jobs:
-        time.sleep(0.01)
-        jobs = []
+    jobs = [0, 0, 0, 0, 0]
+    while sum(jobs) < 3:
+        time.sleep(0.005)
         phandle = win32print.OpenPrinter(currentprinter)
         print_jobs = win32print.EnumJobs(phandle, 0, -1, 1, )
-        # print(print_jobs)
-        if print_jobs:
-            for job in print_jobs:
-                if job['Status'] != 0 or job['Status'] != 8208:
-                    jobs.extend(list(print_jobs))
-                    # for j in print_jobs:
-                    #     print(j['Status'])
-
+        docs_in_queue = {job['pDocument']: job['Status'] for job in print_jobs}
+        # print(docs_in_queue)
+        file_printing = os.path.basename(filepath)
+        if file_printing in docs_in_queue.keys() and jobs[0] != 1:
+            jobs[0] = 1
+        if file_printing in docs_in_queue.keys() and jobs[1] != 1:
+            if docs_in_queue[file_printing] == 8:
+                jobs[1] = 1
+        if file_printing in docs_in_queue.keys() and jobs[2] != 1:
+            if docs_in_queue[file_printing] == 0:
+                jobs[2] = 1
+        if file_printing in docs_in_queue.keys() and jobs[3] != 1:
+            if docs_in_queue[file_printing] == 8208:
+                jobs[3] = 1
+        if file_printing not in docs_in_queue.keys() and jobs[0] == 1:
+            jobs[4] = 1
+        print(jobs)
         win32print.ClosePrinter(phandle)
+    time.sleep(0.5)
+    os.system("taskkill /im pdftoprinter.exe")
