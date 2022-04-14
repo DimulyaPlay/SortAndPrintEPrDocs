@@ -7,6 +7,7 @@ from difflib import SequenceMatcher
 import pdfplumber
 import os
 import win32com.client
+a4 = [596.0, 842.0]
 
 
 def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
@@ -22,11 +23,15 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
         file_slave = PdfFileReader(slave_pdf_filepath, strict=False)
         for i in range(len(file_main.pages)):
             page = file_main.getPage(i)
-            # print(page.mediaBox)
-            if page.mediaBox[2] > page.mediaBox[3]:
-                file_writer.addPage(page.rotateClockwise(90))
-            else:
-                file_writer.addPage(page)
+            mb = page.mediaBox[2:]
+            if mb[0] > mb[1]:
+                page = page.rotateClockwise(90)
+            if mb[0] > a4[0] or mb[1] > a4[1]:
+                hor_koef = a4[0] / float(mb[0])
+                ver_koef = a4[1] / float(mb[1])
+                min_koef = min([hor_koef, ver_koef])
+                page.scaleBy(min_koef)
+            file_writer.addPage(page)
         file_writer.appendPagesFromReader(file_slave)
         outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
         with open(outpath, 'wb') as out:
