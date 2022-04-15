@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 import pdfplumber
 import os
 import win32com.client
-a4 = [596.0, 842.0]
+a4 = [590.0, 836.0]
 
 
 def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
@@ -26,6 +26,7 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
             mb = page.mediaBox[2:]
             if mb[0] > mb[1]:
                 page = page.rotateClockwise(90)
+            mb = page.mediaBox[2:]
             if mb[0] > a4[0] or mb[1] > a4[1]:
                 hor_koef = a4[0] / float(mb[0])
                 ver_koef = a4[1] / float(mb[1])
@@ -84,26 +85,25 @@ def print_file(filepath, exe_path):
                           '.', 0)
     jobs = [0, 0, 0, 0, 0]
     while sum(jobs) < 3:
-        time.sleep(0.005)
+        time.sleep(0.01)
         phandle = win32print.OpenPrinter(currentprinter)
         print_jobs = win32print.EnumJobs(phandle, 0, -1, 1, )
         docs_in_queue = {job['pDocument']: job['Status'] for job in print_jobs}
         # print(docs_in_queue)
         file_printing = os.path.basename(filepath)
-        if file_printing in docs_in_queue.keys() and jobs[0] != 1:
+        if file_printing in docs_in_queue.keys() and jobs[0] != 1:  # "в списке" flag
             jobs[0] = 1
-        if file_printing in docs_in_queue.keys() and jobs[1] != 1:
+        if file_printing in docs_in_queue.keys() and jobs[1] != 1:  # "постановка в очередь" flag
             if docs_in_queue[file_printing] == 8:
                 jobs[1] = 1
-        if file_printing in docs_in_queue.keys() and jobs[2] != 1:
+        if file_printing in docs_in_queue.keys() and jobs[2] != 1:  # "в очереди" flag
             if docs_in_queue[file_printing] == 0:
                 jobs[2] = 1
-        if file_printing in docs_in_queue.keys() and jobs[3] != 1:
+        if file_printing in docs_in_queue.keys() and jobs[3] != 1:  # "печатается" flag
             if docs_in_queue[file_printing] == 8208:
                 jobs[3] = 1
-        if file_printing not in docs_in_queue.keys() and jobs[0] == 1:
+        if file_printing not in docs_in_queue.keys() and jobs[0] == 1:  # "напечатан" flag
             jobs[4] = 1
-        print(jobs)
+        # print(jobs)
         win32print.ClosePrinter(phandle)
-    time.sleep(0.5)
     os.system("taskkill /im pdftoprinter.exe")
