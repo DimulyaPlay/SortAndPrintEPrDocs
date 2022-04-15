@@ -3,11 +3,13 @@ import time
 import win32api
 import win32print
 from PyPDF2 import PdfFileReader, PdfFileWriter
+import PyPDF2
 from difflib import SequenceMatcher
 import pdfplumber
 import os
 import win32com.client
-a4 = [590.0, 836.0]
+a4orig = [595.0, 842.0]
+a4 = [566.0, 800.0]
 
 
 def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
@@ -25,13 +27,18 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
             page = file_main.getPage(i)
             mb = page.mediaBox[2:]
             if mb[0] > mb[1]:
-                page = page.rotateClockwise(90)
+                page = page.rotateClockwise(270)
             mb = page.mediaBox[2:]
-            if mb[0] > a4[0] or mb[1] > a4[1]:
+            if mb[0] > a4orig[0] or mb[1] > a4orig[1]:
                 hor_koef = a4[0] / float(mb[0])
                 ver_koef = a4[1] / float(mb[1])
                 min_koef = min([hor_koef, ver_koef])
                 page.scaleBy(min_koef)
+                oldpage = page
+                page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
+                padx = oldpage.mediaBox[2]/2
+                pady = oldpage.mediaBox[3]/2
+                page.mergeTranslatedPage(oldpage, 300-padx, 420-pady)
             file_writer.addPage(page)
         file_writer.appendPagesFromReader(file_slave)
         outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
