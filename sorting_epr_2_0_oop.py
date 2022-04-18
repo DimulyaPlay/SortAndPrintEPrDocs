@@ -21,6 +21,7 @@ PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)
 default_config = {'delete_zip': 'no',
                   'paper_eco_mode': 'yes',
                   'print_directly': 'no',
+                  'default_printer': win32print.GetDefaultPrinter(),
                   'PDF_PRINT_PATH': PDF_PRINT_FILE,
                   }
 
@@ -32,13 +33,27 @@ def readcreateconfig(default_config, config_path):
         config['DEFAULT'] = default_config
         with open(config_path, 'w') as configfile:
             config.write(configfile)
+        print('default config created')
     else:
         config.read(config_path)
+        print('config read')
     return config
 
 
-config = readcreateconfig(default_config, config_path)
-sorter = main_sorter(config=config, config_path=config_path)
+def write_config_to_file(class_obj, config_obj):
+    # записать переменные в конфиг
+    config_obj['DEFAULT']['delete_zip'] = class_obj.deletezip
+    config_obj['DEFAULT']['paper_eco_mode'] = class_obj.paperecomode
+    config_obj['DEFAULT']['print_directly'] = class_obj.print_directly
+    config_obj['DEFAULT']['default_printer'] = class_obj.default_printer
+    config_obj['DEFAULT']['PDF_PRINT_PATH'] = os.path.join(os.path.dirname(config_path),
+                                                           'PDFtoPrinter.exe')  # Установить место хранения программы
+    print('saved')
+    with open(config_path, 'w') as configfile:
+        config_obj.write(configfile)
+
+
+sorter = main_sorter(config=readcreateconfig(default_config, config_path), config_path=config_path)
 
 
 def main_drop(event):
@@ -68,26 +83,24 @@ def apply(sorter_obj=sorter):
     sorter_obj.deletezip = opt1.get()
     sorter_obj.paperecomode = opt2.get()
     sorter_obj.print_directly = opt3.get()
-    sorter_obj.write_config_to_file()
+    write_config_to_file(sorter_obj, sorter_obj.config_obj)
 
 
 def show_settings(e):
-    newWindow = Toplevel(root)
-    newWindow.title("Параметры")
-    newWindow.geometry('140x100')
-    c1 = Checkbutton(newWindow, text="Удалить Zip",
-                     variable=opt1,
-                     onvalue=1, offvalue=0, command=apply)
-    c1.pack(anchor=W)
-    c2 = Checkbutton(newWindow, text="Эко режим",
-                     variable=opt2,
-                     onvalue=1, offvalue=0, command=apply)
-    c2.pack(anchor=W)
-    c3 = Checkbutton(newWindow, text="Печать на принтер",
-                     variable=opt3,
-                     onvalue=1, offvalue=0, command=apply)
-    c3.pack(anchor=W)
-    label = Label(newWindow, text=" Кредитс ", borderwidth=2, relief="groove")
+    settings = Toplevel(root)
+    settings.title("Параметры")
+    Checkbutton(settings, text="Удалить Zip",
+                variable=opt1,
+                onvalue='yes', offvalue='no', command=apply).pack(anchor=W)
+
+    Checkbutton(settings, text="Эко режим",
+                variable=opt2,
+                onvalue='yes', offvalue='no', command=apply).pack(anchor=W)
+
+    Checkbutton(settings, text="Печать на принтер",
+                variable=opt3,
+                onvalue='yes', offvalue='no', command=apply).pack(anchor=W)
+    label = Label(settings, text=" Кредитс ", borderwidth=2, relief="groove")
     label.pack(anchor=S)
     label.bind("<Button-1>", show_credits)
 
@@ -121,18 +134,18 @@ def print_dialog():
         cbVariables[winSt[i]] = BooleanVar()
         cbVariables[winSt[i]].set(1)
         cb[i] = Checkbutton(dialog, variable=cbVariables[winSt[i]], command=update_num_pages)
-        cb[i].grid(column=0, row=i+1, sticky=W)
+        cb[i].grid(column=0, row=i + 1, sticky=W)
         lb[i] = Label(dialog, text=winSt_names[i])
-        lb[i].grid(column=1, row=i+1, sticky=W)
+        lb[i].grid(column=1, row=i + 1, sticky=W)
         lb[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(a))
         lbstr[i] = Label(dialog, text=str(sorter.num_pages[winSt[i]]), padx=2)
-        lbstr[i].grid(column=2, row=i+1)
+        lbstr[i].grid(column=2, row=i + 1)
     len_pages.set(sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if cbVariables[winSt[i]].get()]))
     print_b = Label(dialog, text=" Печать ", borderwidth=2, relief="groove")
-    print_b.grid(column=1, row=i+2, sticky=S)
+    print_b.grid(column=1, row=i + 2, sticky=S)
     print_b.bind("<Button-1>", apply_print)
     sum_pages = Label(dialog, textvariable=len_pages)
-    sum_pages.grid(column=2, row=i+2, sticky=S)
+    sum_pages.grid(column=2, row=i + 2, sticky=S)
 
 
 def show_printed():
@@ -154,13 +167,14 @@ root.geometry('35x45')
 root.overrideredirect(True)
 root.attributes('-topmost', True)
 
-
-opt1 = BooleanVar()
+opt1 = StringVar()
 opt1.set(sorter.deletezip)
-opt2 = BooleanVar()
+opt2 = StringVar()
 opt2.set(sorter.paperecomode)
-opt3 = BooleanVar()
+opt3 = StringVar()
 opt3.set(sorter.print_directly)
+opt4 = StringVar()
+opt4.set(sorter.default_printer)
 
 title_bar = Frame(root, bd=1)
 title_bar.pack(expand=0, fill=X)
