@@ -67,8 +67,12 @@ def extracttext(path):
 
 def check_num_pages(path):
     # принимает строку - путь к файлу пдф, возвращает кол-во страниц
-    with pdfplumber.open(path) as pdf:
-        pages = len(pdf.pages)
+    try:
+        with pdfplumber.open(path) as pdf:
+            pages = len(pdf.pages)
+    except:
+        print("num pages error, set to 2", path)
+        pages = 2
     return pages
 
 
@@ -86,13 +90,12 @@ def wordpdf(origfile):
     return neworigfile
 
 
-def print_file(filepath, exe_path):
+def print_file(filepath, exe_path, currentprinter):
     # Печать файла через консольную утилиту.
     # Принимает строки - путь к пдф и путь к утилите. Открывает утилиту, печатает и дожидается
     # пока документ не будет напечатан
-    currentprinter = win32print.GetDefaultPrinter()  # можно будет задать свой принтер для печати
     win32api.ShellExecute(0, 'open', exe_path,
-                          '/s ' + filepath,
+                          '/s ' + filepath + ' "'+currentprinter+'" ',
                           '.', 0)
     jobs = [0, 0, 0, 0, 0]
     while sum(jobs) < 3:
