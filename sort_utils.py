@@ -94,9 +94,11 @@ def print_file(filepath, exe_path, currentprinter):
     # Печать файла через консольную утилиту.
     # Принимает строки - путь к пдф и путь к утилите. Открывает утилиту, печатает и дожидается
     # пока документ не будет напечатан
+    print(filepath)
     win32api.ShellExecute(0, 'open', exe_path,
-                          '/s ' + filepath + ' "'+currentprinter+'" ',
+                          '/s ' + '"'+filepath+'"' + ' "'+currentprinter+'" ',
                           '.', 0)
+
     jobs = [0, 0, 0, 0, 0]
     while sum(jobs) < 3:
         time.sleep(0.01)

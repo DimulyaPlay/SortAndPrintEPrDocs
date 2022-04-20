@@ -114,6 +114,7 @@ def print_dialog():
     dialog.attributes('-topmost', True)
     list_files = Frame(dialog)
     list_files.pack()
+
     def apply_print(e):
         for i, j in cbVariables.items():
             if j.get():
@@ -122,7 +123,7 @@ def print_dialog():
 
     def update_num_pages():
         full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if cbVariables[winSt[i]].get()])
-        eco_len = sum([int(sorter.num_pages[winSt[i]]/2) for i in range(len(winSt)) if cbVariables[winSt[i]].get()])
+        eco_len = sum([int(sorter.num_pages[winSt[i]]/2+0.5) for i in range(len(winSt)) if cbVariables[winSt[i]].get()])
         string = f"{full_len}({eco_len})"
         len_pages.set(string)
 
