@@ -10,8 +10,8 @@ import win32com.client
 import tempfile
 
 a4orig = [612.1, 842.0]
-a4small = [i*0.95 for i in a4orig]
-print(a4small)
+a4small = [i * 0.95 for i in a4orig]
+
 
 def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
     # присоединение второго пдф файла к первому
@@ -32,24 +32,24 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
                 page = file_main.getPage(i)
                 page_width = page.mediaBox.getWidth()
                 page_height = page.mediaBox.getHeight()
-                print(os.path.basename(main_pdf_filepath), page.mediaBox.getWidth(), page.mediaBox.getHeight())
+                # print(os.path.basename(main_pdf_filepath), page.mediaBox.getWidth(), page.mediaBox.getHeight())
                 if page_width > page_height:
-                    print('rotated')
+                    # print('rotated')
                     page = page.rotateClockwise(270)
                 page_width = page.mediaBox.getWidth()
                 page_height = page.mediaBox.getHeight()
-                print(os.path.basename(main_pdf_filepath), page.mediaBox.getWidth(), page.mediaBox.getHeight())
+                # print(os.path.basename(main_pdf_filepath), page.mediaBox.getWidth(), page.mediaBox.getHeight())
                 if page_width > a4orig[0] or page_height > a4orig[1]:
                     hor_koef = a4small[0] / float(page_width)
                     ver_koef = a4small[1] / float(page_height)
                     min_koef = min([hor_koef, ver_koef])
-                    print('resizing')
+                    # print('resizing')
                     page.scaleBy(min_koef)
                     oldpage = page
-                    page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
+                    page = PyPDF2.pdf.PageObject.createBlankPage(width=612.1, height=842.0)
                     padx = oldpage.mediaBox.getWidth() / 2
                     pady = oldpage.mediaBox.getHeight() / 2
-                    page.mergeTranslatedPage(oldpage, 300 - padx, 420 - pady)
+                    page.mergeTranslatedPage(oldpage, 298 - padx, 421 - pady)
                 file_writer.addPage(page)
         file_writer.appendPagesFromReader(file_slave)
         outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
@@ -58,26 +58,62 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
     return outpath, broken
 
 
-def multiplePagesPerSheet(filepath):
+def multiplePagesPerSheet(filepath, mode):
+    if mode == 1:
+        return filepath
     orig_file = PdfFileReader(filepath, strict=False)
     merged_file = PdfFileWriter()
     n_pages = len(orig_file.pages)
-    for i in range(0, n_pages, 2):
-        big_page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
-        big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i],
-                                                  rotation=90,
-                                                  scale=0.7,
-                                                  tx=595.2,
-                                                  ty=0)
-        try:
-            big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i + 1],
+    if mode == 2:
+        for i in range(0, n_pages, 2):
+            big_page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
+            big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i],
                                                       rotation=90,
                                                       scale=0.7,
                                                       tx=595.2,
-                                                      ty=421.44)
-        except:
-            pass
-        merged_file.addPage(big_page)
+                                                      ty=0)
+            try:
+                big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i + 1],
+                                                          rotation=90,
+                                                          scale=0.7,
+                                                          tx=595.2,
+                                                          ty=421.44)
+            except:
+                pass
+            merged_file.addPage(big_page)
+    if mode == 4:
+        for i in range(0, n_pages, 4):
+            big_page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
+            big_page.mergeScaledTranslatedPage(orig_file.pages[i],
+                                               scale=0.51,
+                                               tx=10,
+                                               ty=411.44)
+            try:
+                big_page.mergeScaledTranslatedPage(orig_file.pages[i + 1],
+                                                   scale=0.51,
+                                                   tx=288,
+                                                   ty=411.44)
+            except:
+                print('fail 2')
+                pass
+
+            try:
+                big_page.mergeScaledTranslatedPage(orig_file.pages[i + 2],
+                                                   scale=0.51,
+                                                   tx=10,
+                                                   ty=0)
+            except:
+                print('fail 3')
+                pass
+            try:
+                big_page.mergeScaledTranslatedPage(orig_file.pages[i + 3],
+                                                   scale=0.51,
+                                                   tx=288,
+                                                   ty=0)
+            except:
+                print('fail 4')
+                pass
+            merged_file.addPage(big_page)
     fd, outpath = tempfile.mkstemp('.pdf')
     os.close(fd)
     with open(outpath, 'wb') as out:

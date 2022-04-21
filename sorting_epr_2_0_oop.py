@@ -117,16 +117,13 @@ def print_dialog():
     def apply_print(e):
         for i, j in printcbVariables.items():
             if j.get():
-                if rbVariables[i].get() == 1:
-                    print_file(i, PDF_PRINT_FILE, sorter.default_printer)
-                if rbVariables[i].get() == 2:
-                    print_file(multiplePagesPerSheet(i), PDF_PRINT_FILE, sorter.default_printer)
+                print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE, sorter.default_printer)
         show_printed()
 
     def update_num_pages():
         full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         eco_len = sum(
-            [int(sorter.num_pages[winSt[i]] / 2 + 0.5) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
+            [int(sorter.num_pages[winSt[i]] / 2 /(rbVariables[winSt[i]].get()) + 0.9) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         string = f"{full_len}({eco_len})"
         len_pages.set(string)
 
@@ -146,10 +143,12 @@ def print_dialog():
     rbuttons1 = {}
     rbuttons2 = {}
     rbuttons4 = {}
-    lb_pages = Label(container, text='Страниц')
-    lb_pages.grid(column=2, row=0)
-    lb_names = Label(container, text='Название документа')
-    lb_names.grid(column=1, row=0)
+    previewbtns = {}
+    Label(container, text='Название документа').grid(column=1, row=0)
+    Label(container, text='Страниц').grid(column=2, row=0)
+    Label(container, text='1').grid(column=3, row=0)
+    Label(container, text='2').grid(column=4, row=0)
+    Label(container, text='4').grid(column=5, row=0)
     for i in range(len(winSt)):
         printcbVariables[winSt[i]] = BooleanVar()
         printcbVariables[winSt[i]].set(1)
@@ -162,12 +161,16 @@ def print_dialog():
         numpages[i].grid(column=2, row=i + 1)
         rbVariables[winSt[i]] = IntVar()
         rbVariables[winSt[i]].set(1)
-        rbuttons1[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=1, command=rbplaceholder)
+        rbuttons1[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=1, command=update_num_pages)
         rbuttons1[i].grid(column=3, row=i + 1, sticky=W)
-        rbuttons2[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=2, command=rbplaceholder)
+        rbuttons2[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=2, command=update_num_pages)
         rbuttons2[i].grid(column=4, row=i + 1, sticky=W)
-        rbuttons4[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=4, command=rbplaceholder)
+        rbuttons4[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=4, command=update_num_pages)
         rbuttons4[i].grid(column=5, row=i + 1, sticky=W)
+        previewbtns[i] = Label(container, text='Preview', padx=2)
+        previewbtns[i].grid(column=6, row=i + 1)
+        previewbtns[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(multiplePagesPerSheet(a, rbVariables[a].get())))
+
     bottom_actions = Frame(dialog)
     bottom_actions.pack()
     len_pages = StringVar()
