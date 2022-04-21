@@ -1,3 +1,4 @@
+import os.path
 import sys
 from tkinter import *
 import win32print
@@ -112,50 +113,73 @@ def print_dialog():
     dialog = Toplevel(root)
     dialog.title(f'Файлов на печать {len(sorter.files_for_print)}')
     dialog.attributes('-topmost', True)
-    list_files = Frame(dialog)
-    list_files.pack()
 
     def apply_print(e):
-        for i, j in cbVariables.items():
+        for i, j in printcbVariables.items():
             if j.get():
-                print_file(i, PDF_PRINT_FILE, sorter.default_printer)
+                if rbVariables[i].get() == 1:
+                    print_file(i, PDF_PRINT_FILE, sorter.default_printer)
+                if rbVariables[i].get() == 2:
+                    print_file(multiplePagesPerSheet(i), PDF_PRINT_FILE, sorter.default_printer)
         show_printed()
 
     def update_num_pages():
-        full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if cbVariables[winSt[i]].get()])
-        eco_len = sum([int(sorter.num_pages[winSt[i]]/2+0.5) for i in range(len(winSt)) if cbVariables[winSt[i]].get()])
+        full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
+        eco_len = sum(
+            [int(sorter.num_pages[winSt[i]] / 2 + 0.5) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         string = f"{full_len}({eco_len})"
         len_pages.set(string)
 
+    def rbplaceholder():
+        for k, v in rbVariables.items():
+            print(v.get())
+
+    container = Frame(dialog)
+    container.pack()
     winSt = sorter.files_for_print
     winSt_names = [os.path.basename(i) for i in winSt]
-    cbVariables = {}
-    cb = {}
-    lb = {}
-    lbstr = {}
-    lb_pages = Label(list_files, text='Страниц')
+    printcbVariables = {}
+    printcb = {}
+    filenames = {}
+    numpages = {}
+    rbVariables = {}
+    rbuttons1 = {}
+    rbuttons2 = {}
+    rbuttons4 = {}
+    lb_pages = Label(container, text='Страниц')
     lb_pages.grid(column=2, row=0)
-    lb_names = Label(list_files, text='Название документа')
+    lb_names = Label(container, text='Название документа')
     lb_names.grid(column=1, row=0)
     for i in range(len(winSt)):
-        cbVariables[winSt[i]] = BooleanVar()
-        cbVariables[winSt[i]].set(1)
-        cb[i] = Checkbutton(list_files, variable=cbVariables[winSt[i]], command=update_num_pages)
-        cb[i].grid(column=0, row=i + 1, sticky=W)
-        lb[i] = Label(list_files, text=winSt_names[i])
-        lb[i].grid(column=1, row=i + 1, sticky=W)
-        lb[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(a))
-        lbstr[i] = Label(list_files, text=str(sorter.num_pages[winSt[i]]), padx=2)
-        lbstr[i].grid(column=2, row=i + 1)
+        printcbVariables[winSt[i]] = BooleanVar()
+        printcbVariables[winSt[i]].set(1)
+        printcb[i] = Checkbutton(container, variable=printcbVariables[winSt[i]], command=update_num_pages)
+        printcb[i].grid(column=0, row=i + 1, sticky=W)
+        filenames[i] = Label(container, text=winSt_names[i])
+        filenames[i].grid(column=1, row=i + 1, sticky=W)
+        filenames[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(a))
+        numpages[i] = Label(container, text=str(sorter.num_pages[winSt[i]]), padx=2)
+        numpages[i].grid(column=2, row=i + 1)
+        rbVariables[winSt[i]] = IntVar()
+        rbVariables[winSt[i]].set(1)
+        rbuttons1[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=1, command=rbplaceholder)
+        rbuttons1[i].grid(column=3, row=i + 1, sticky=W)
+        rbuttons2[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=2, command=rbplaceholder)
+        rbuttons2[i].grid(column=4, row=i + 1, sticky=W)
+        rbuttons4[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=4, command=rbplaceholder)
+        rbuttons4[i].grid(column=5, row=i + 1, sticky=W)
     bottom_actions = Frame(dialog)
     bottom_actions.pack()
     len_pages = StringVar()
     update_num_pages()
+    open_folder_b = Label(bottom_actions, text=" Открыть папку ", borderwidth=2, relief="groove")
+    open_folder_b.grid(column=0, row=0, sticky=S, padx=5, pady=2)
+    open_folder_b.bind("<Button-1>", lambda event, a=os.path.dirname(winSt[0]): subprocess.Popen(f'explorer {a}'))
     print_b = Label(bottom_actions, text=" Печать ", borderwidth=2, relief="groove")
-    print_b.grid(column=1, row=0, sticky=S)
+    print_b.grid(column=1, row=0, sticky=S, padx=5, pady=2)
     print_b.bind("<Button-1>", apply_print)
     sum_pages = Label(bottom_actions, textvariable=len_pages)
-    sum_pages.grid(column=2, row=0, sticky=S)
+    sum_pages.grid(column=2, row=0, sticky=S, padx=5, pady=2)
 
 
 def show_printed():
