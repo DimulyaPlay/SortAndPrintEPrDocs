@@ -15,24 +15,11 @@ class main_sorter:
 
     def read_vars_from_config(self):
         # получить переменные из конфига
-        try:
-            self.deletezip = self.config_obj.getboolean('DEFAULT', 'delete_zip')
-            self.paperecomode = self.config_obj.getboolean('DEFAULT', 'paper_eco_mode')
-            self.print_directly = self.config_obj.getboolean('DEFAULT', 'print_directly')
-            self.PDF_PRINT_FILE = self.config_obj.get('DEFAULT', 'PDF_PRINT_PATH')
-        except:
-            os.remove(self.config_path)
-            self.write_config_to_file()
-
-    def write_config_to_file(self):
-        # записать переменные в конфиг
-        self.config_obj['DEFAULT']['delete_zip'] = 'no' if not self.deletezip else 'yes'
-        self.config_obj['DEFAULT']['paper_eco_mode'] = 'no' if not self.paperecomode else 'yes'
-        self.config_obj['DEFAULT']['print_directly'] = 'no' if not self.print_directly else 'yes'
-        self.config_obj['DEFAULT']['PDF_PRINT_PATH'] = os.path.join(os.path.dirname(self.config_path), 'PDFtoPrinter.exe')   # Установить место хранения программы
-        print('saved')
-        with open(self.config_path, 'w') as configfile:
-            self.config_obj.write(configfile)
+        self.deletezip = self.config_obj.get('DEFAULT', 'delete_zip')
+        self.paperecomode = self.config_obj.get('DEFAULT', 'paper_eco_mode')
+        self.print_directly = self.config_obj.get('DEFAULT', 'print_directly')
+        self.default_printer = self.config_obj.get('DEFAULT', 'default_printer')
+        self.PDF_PRINT_FILE = self.config_obj.get('DEFAULT', 'PDF_PRINT_PATH')
 
     def agregate_file(self, givenpath):
         self.num_pages = {}
@@ -42,7 +29,7 @@ class main_sorter:
             foldername = foldername + str(random.randint(1, 999))
         with ZipFile(givenpath, 'r') as zipObj:
             zipObj.extractall(foldername)
-        if self.deletezip:
+        if self.deletezip == 'yes':
             os.remove(givenpath)
         siglist = glob.glob("{0}{1}*.sig".format(foldername, os.sep))
         for i in siglist:
@@ -86,7 +73,7 @@ class main_sorter:
         counter = 0
         all_keys = sorted(queue.keys())
         for i in sorted(queue.keys()):
-            if not self.paperecomode:
+            if self.paperecomode == "no":
                 queue_files.append('{0}\\{1}'.format(foldername, queue[i]))
                 queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
                 if os.path.exists('{0}\\{1}'.format(foldername, queue[i])):
@@ -96,7 +83,8 @@ class main_sorter:
                     if queue[i + 1].startswith('Protokol_proverki_fayla_'):
                         # print("Протокол есть для файла: ", queue[i])
                         merged_file, broken = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
-                                                          '{0}\\{1}'.format(foldername, queue[i + 1]))
+                                                          '{0}\\{1}'.format(foldername, queue[i + 1]),
+                                                          self.print_directly)
                         if not broken:
                             os.remove('{0}\\{1}'.format(foldername, queue[i]))
                             os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
@@ -126,4 +114,3 @@ class main_sorter:
 
 def no_kvitancii():
     messagebox.showinfo("Варнинг", "В архиве не обнаружена квитанция.")
-
