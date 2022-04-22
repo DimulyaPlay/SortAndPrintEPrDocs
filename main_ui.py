@@ -127,10 +127,6 @@ def print_dialog():
         string = f"{full_len}({eco_len})"
         len_pages.set(string)
 
-    def rbplaceholder():
-        for k, v in rbVariables.items():
-            print(v.get())
-
     container = Frame(dialog)
     container.pack()
     winSt = sorter.files_for_print
@@ -167,10 +163,9 @@ def print_dialog():
         rbuttons2[i].grid(column=4, row=i + 1, sticky=W)
         rbuttons4[i] = Radiobutton(container, variable=rbVariables[winSt[i]], value=4, command=update_num_pages)
         rbuttons4[i].grid(column=5, row=i + 1, sticky=W)
-        previewbtns[i] = Label(container, text='Preview', padx=2)
+        previewbtns[i] = Label(container, text='Предпросмотр', padx=2)
         previewbtns[i].grid(column=6, row=i + 1)
-        previewbtns[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(multiplePagesPerSheet(a, rbVariables[a].get())))
-
+        previewbtns[i].bind('<Button-1>', lambda event, a=winSt[i]: os.startfile(multiplePagesPerSheet(a, rbVariables[a].get())))
     bottom_actions = Frame(dialog)
     bottom_actions.pack()
     len_pages = StringVar()
@@ -190,13 +185,13 @@ def show_printed():
 
 
 def not_zip(e):
-    messagebox.showinfo("Варнинг", "Загружен не Zip архив.")
+    messagebox.showwarning("Варнинг", "Загружен не Zip архив.")
 
 
 def show_credits(e):
     messagebox.showinfo("Кредитс",
                         "Сортировка документов с сайта Электронное провосудие.\nАвтор: консультант Краснокамского гс "
-                        "Соснин Дмитрий.\nВерсия 2.1")
+                        "Соснин Дмитрий.\nВерсия 3.0")
 
 
 # main window
