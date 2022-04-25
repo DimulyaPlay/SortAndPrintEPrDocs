@@ -5,6 +5,7 @@ import win32print
 from tkinterdnd2 import *
 from sorter_class import *
 import configparser
+from scrollable_frame import VerticalScrolledFrame
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -104,15 +105,19 @@ def show_settings(e):
                 variable=opt3,
                 onvalue='yes', offvalue='no', command=apply).pack(anchor=W)
     OptionMenu(settings, opt4, *printer_list, command=apply).pack(anchor=W)
-    label = Label(settings, text=" Автор ", borderwidth=2, relief="groove")
-    label.pack(anchor=S)
-    label.bind("<Button-1>", show_credits)
+    showcredits = Label(settings, text="  Автор  ", borderwidth=2, relief="groove")
+    showcredits.pack(anchor=S, padx=2, pady=2)
+    showcredits.bind("<Button-1>", show_credits)
+    opengh = Label(settings, text=" GitHub ", borderwidth=2, relief="groove")
+    opengh.pack(anchor=S, padx=2, pady=2)
+    opengh.bind("<Button-1>", lambda e: os.startfile('https://github.com/DimulyaPlay/SortAndPrintEPrDocs'))
 
 
 def print_dialog():
     dialog = Toplevel(root)
     dialog.title(f'Файлов на печать {len(sorter.files_for_print)}')
     dialog.attributes('-topmost', True)
+    dialog.resizable(False, False)
 
     def apply_print(e):
         for i, j in printcbVariables.items():
@@ -127,10 +132,10 @@ def print_dialog():
         string = f"{full_len}({eco_len})"
         len_pages.set(string)
 
-    container = Frame(dialog)
+    container = VerticalScrolledFrame(dialog, height=550 if len(sorter.files_for_print) > 20 else len(sorter.files_for_print)*30, width=728)
     container.pack()
     winSt = sorter.files_for_print
-    winSt_names = [os.path.basename(i) for i in winSt]
+    winSt_names = [os.path.basename(i) if len(os.path.basename(i)) < 58 else os.path.basename(i)[:55]+'...' for i in winSt]
     printcbVariables = {}
     printcb = {}
     filenames = {}
@@ -150,7 +155,7 @@ def print_dialog():
         printcbVariables[winSt[i]].set(1)
         printcb[i] = Checkbutton(container, variable=printcbVariables[winSt[i]], command=update_num_pages)
         printcb[i].grid(column=0, row=i + 1, sticky=W)
-        filenames[i] = Label(container, text=winSt_names[i])
+        filenames[i] = Label(container, text=winSt_names[i], font='TkFixedFont')
         filenames[i].grid(column=1, row=i + 1, sticky=W)
         filenames[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(a))
         numpages[i] = Label(container, text=str(sorter.num_pages[winSt[i]]), padx=2)
@@ -191,7 +196,7 @@ def not_zip(e):
 def show_credits(e):
     messagebox.showinfo("Кредитс",
                         "Сортировка документов с сайта Электронное провосудие.\nАвтор: консультант Краснокамского гс "
-                        "Соснин Дмитрий.\nВерсия 3.0")
+                        "Соснин Дмитрий.\nВерсия 3.1")
 
 
 # main window
