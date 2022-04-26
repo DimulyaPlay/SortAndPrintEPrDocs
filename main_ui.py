@@ -129,10 +129,10 @@ def print_dialog():
         full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         eco_len = sum(
             [int(sorter.num_pages[winSt[i]] / 2 /(rbVariables[winSt[i]].get()) + 0.9) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
-        string = f"{full_len}({eco_len})"
+        string = f"Всего для печати страниц: {full_len}, листов: {eco_len}"
         len_pages.set(string)
 
-    container = VerticalScrolledFrame(dialog, height=550 if len(sorter.files_for_print) > 20 else len(sorter.files_for_print)*30, width=728)
+    container = VerticalScrolledFrame(dialog, height=550 if len(sorter.files_for_print) > 20 else (len(sorter.files_for_print)+1)*25, width=731)
     container.pack()
     winSt = sorter.files_for_print
     winSt_names = [os.path.basename(i) if len(os.path.basename(i)) < 58 else os.path.basename(i)[:55]+'...' for i in winSt]
