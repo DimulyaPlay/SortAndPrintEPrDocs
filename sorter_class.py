@@ -108,7 +108,7 @@ class main_sorter:
                 os.replace(i, j)
                 self.num_pages[j] = check_num_pages(j)
                 self.files_for_print.append(j)
-        if not self.print_directly:
+        if self.print_directly == 'no':
             subprocess.Popen(f'explorer {foldername}')
 
 

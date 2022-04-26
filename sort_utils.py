@@ -51,6 +51,8 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
                     pady = oldpage.mediaBox.getHeight() / 2
                     page.mergeTranslatedPage(oldpage, 298 - padx, 421 - pady)
                 file_writer.addPage(page)
+        else:
+            file_writer.appendPagesFromReader(file_main)
         file_writer.appendPagesFromReader(file_slave)
         outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
         with open(outpath, 'wb') as out:
