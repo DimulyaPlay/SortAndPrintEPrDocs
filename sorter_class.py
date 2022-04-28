@@ -82,18 +82,19 @@ class main_sorter:
                 if i + 1 in all_keys:
                     if queue[i + 1].startswith('Protokol_proverki_fayla_'):
                         # print("Протокол есть для файла: ", queue[i])
-                        merged_file, broken = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
+                        merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
                                                           '{0}\\{1}'.format(foldername, queue[i + 1]),
                                                           self.print_directly)
+                        broken = 0
                         if not broken:
                             os.remove('{0}\\{1}'.format(foldername, queue[i]))
                             os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
                         queue_files.append(merged_file)
                         queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
-                        if broken:
-                            queue_files.append('{0}\\{1}'.format(foldername, queue[i + 1]))
-                            counter += 1
-                            queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i + 1])
+                        # if broken:
+                        #     queue_files.append('{0}\\{1}'.format(foldername, queue[i + 1]))
+                        #     counter += 1
+                        #     queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i + 1])
                         counter += 1
                 else:
                     if not queue[i].startswith('Protokol_proverki_fayla_'):

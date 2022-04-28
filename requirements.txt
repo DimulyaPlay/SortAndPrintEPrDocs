@@ -1,4 +1,7 @@
 pdfplumber==0.6.0
-PyPDF2==1.27.7
+PyPDF2~=1.26.0
 pywin32==303
-tkinterdnd2==0.3.0
+
+future~=0.18.2
+pdfstitcher~=0.6.1
+pikepdf~=5.1.2
