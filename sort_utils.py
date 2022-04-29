@@ -12,7 +12,7 @@ import win32com.client
 import tempfile
 
 a4orig = [612.1, 842.0]
-a4small = [i * 0.92 for i in a4orig]
+a4small = [i * 0.95 for i in a4orig]
 
 
 def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
@@ -89,13 +89,13 @@ def multiplePagesPerSheet(filepath, mode):
             big_page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
             big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i],
                                                       rotation=90,
-                                                      scale=0.70,
+                                                      scale=0.68,
                                                       tx=585.2,
                                                       ty=10)
             try:
                 big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i + 1],
                                                           rotation=90,
-                                                          scale=0.70,
+                                                          scale=0.68,
                                                           tx=585.2,
                                                           ty=430)
             except:
@@ -108,12 +108,12 @@ def multiplePagesPerSheet(filepath, mode):
         for i in range(0, n_pages, 4):
             big_page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
             big_page.mergeScaledTranslatedPage(orig_file.pages[i],
-                                               scale=0.50,
+                                               scale=0.48,
                                                tx=10,
                                                ty=411.44)
             try:
                 big_page.mergeScaledTranslatedPage(orig_file.pages[i + 1],
-                                                   scale=0.50,
+                                                   scale=0.48,
                                                    tx=288,
                                                    ty=411.44)
             except:
@@ -121,14 +121,14 @@ def multiplePagesPerSheet(filepath, mode):
 
             try:
                 big_page.mergeScaledTranslatedPage(orig_file.pages[i + 2],
-                                                   scale=0.50,
+                                                   scale=0.48,
                                                    tx=10,
                                                    ty=10)
             except:
                 pass
             try:
                 big_page.mergeScaledTranslatedPage(orig_file.pages[i + 3],
-                                                   scale=0.50,
+                                                   scale=0.48,
                                                    tx=283,
                                                    ty=10)
             except:
