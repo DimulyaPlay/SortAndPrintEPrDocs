@@ -10,6 +10,7 @@ import pdfplumber
 import os
 import win32com.client
 import tempfile
+from PIL import Image
 
 a4orig = [612.1, 842.0]
 a4small = [i * 0.95 for i in a4orig]
@@ -19,29 +20,6 @@ def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
     # присоединение второго пдф файла к первому
     file_main = Pdf.open(main_pdf_filepath)
     file_slave = Pdf.open(slave_pdf_filepath)
-    # for i in range(len(file_main.pages)):
-    #     page = file_main.pages[i]
-    #     page_width = page.mediabox[2]
-    #     page_height = page.mediabox[3]
-    #     # print(os.path.basename(main_pdf_filepath), page_width, page_height)
-    #     if page_width > page_height:
-    #         # print('rotated')
-    #         page.Rotate = 270
-    # page_width = page.mediaBox.getWidth()
-    # page_height = page.mediaBox.getHeight()
-    # print(os.path.basename(main_pdf_filepath), page.mediaBox.getWidth(), page.mediaBox.getHeight())
-    # if page_width > a4orig[0] or page_height > a4orig[1]:
-    #     hor_koef = a4small[0] / float(page_width)
-    #     ver_koef = a4small[1] / float(page_height)
-    #     min_koef = min([hor_koef, ver_koef])
-    #     # print('resizing')
-    #     page.scaleBy(min_koef)
-    #     oldpage = page
-    #     page = PyPDF2.pdf.PageObject.createBlankPage(width=612.1, height=842.0)
-    #     padx = oldpage.mediaBox.getWidth() / 2
-    #     pady = oldpage.mediaBox.getHeight() / 2
-    #     page.mergeTranslatedPage(oldpage, 298 - padx, 421 - pady)
-    # new_pdf.pages.append(page)
     file_main.pages.extend(file_slave.pages)
     outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
     file_main.save(outpath)
@@ -170,6 +148,18 @@ def wordpdf(origfile):
     doc.SaveAs(convfile, FileFormat=17)
     doc.Close()
     word.Quit()
+    os.remove(origfile)
+    neworigfile = f'{origfile.rsplit(".")[0]}.pdf'
+    os.rename(convfile, neworigfile)
+    return neworigfile
+
+
+def imagepdf(origfile):
+    # конвертация word в pdf открывает копию, и сохраняет в ориг
+    convfile = f'{origfile}.pdf'
+    image = Image.open(origfile)
+    image.convert('RGB')
+    image.save(convfile)
     os.remove(origfile)
     neworigfile = f'{origfile.rsplit(".")[0]}.pdf'
     os.rename(convfile, neworigfile)

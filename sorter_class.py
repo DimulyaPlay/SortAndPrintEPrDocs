@@ -41,6 +41,7 @@ class main_sorter:
                     'Protokol_proverki_fayla_'):
                 basedoclist.append(i)
         doclist = [wordpdf(i) if i.endswith(('.doc', '.docx')) else i for i in basedoclist]
+        doclist = [imagepdf(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in basedoclist]
         protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
         kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke')]
 

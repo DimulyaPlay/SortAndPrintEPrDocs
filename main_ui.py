@@ -189,7 +189,7 @@ def show_printed():
     messagebox.showinfo("Готово", "Документы отправлены в очередь принтера.")
 
 
-def not_zip(e):
+def not_zip():
     messagebox.showwarning("Варнинг", "Загружен не Zip архив.")
 
 
