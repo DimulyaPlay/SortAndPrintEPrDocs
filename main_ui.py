@@ -128,7 +128,7 @@ def print_dialog():
     def update_num_pages():
         full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         eco_len = sum(
-            [int(sorter.num_pages[winSt[i]] / 2 /(rbVariables[winSt[i]].get()) + 0.9) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
+            [int(sorter.num_pages[winSt[i]] / 2 / (rbVariables[winSt[i]].get()) + 0.9) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         string = f"Всего для печати страниц: {full_len}, листов: {eco_len}"
         len_pages.set(string)
 
@@ -229,3 +229,4 @@ opt4 = StringVar()
 opt4.set(sorter.default_printer)
 
 root.mainloop()
+

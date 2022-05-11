@@ -41,10 +41,9 @@ class main_sorter:
                     'Protokol_proverki_fayla_'):
                 basedoclist.append(i)
         doclist = [wordpdf(i) if i.endswith(('.doc', '.docx')) else i for i in basedoclist]
-        doclist = [imagepdf(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in basedoclist]
+        doclist = [imagepdf(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
         protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
         kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke')]
-
         if not kvitanciya:
             no_kvitancii()
             return
@@ -62,7 +61,7 @@ class main_sorter:
                 continue
             for protpath in protlist:
                 protname = os.path.basename(protpath)
-                if protname.find(filename.rsplit('_na_', 1)[0][:76]) != -1:
+                if protname.find(filename.rsplit('_na_', 1)[0][:76]) != -1 or protname.find(filename.rsplit('[', 1)[0][:76]) != -1:
                     similarity = similar(filename.rsplit('_na_', 1)[0][:76], protname[24:-4])
                     prots_similarity[protpath] = similarity
             maxsimilarity = max(zip(prots_similarity.values(), prots_similarity.keys()))[1]
@@ -84,8 +83,8 @@ class main_sorter:
                     if queue[i + 1].startswith('Protokol_proverki_fayla_'):
                         # print("Протокол есть для файла: ", queue[i])
                         merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
-                                                          '{0}\\{1}'.format(foldername, queue[i + 1]),
-                                                          self.print_directly)
+                                                  '{0}\\{1}'.format(foldername, queue[i + 1]),
+                                                  self.print_directly)
                         broken = 0
                         if not broken:
                             os.remove('{0}\\{1}'.format(foldername, queue[i]))

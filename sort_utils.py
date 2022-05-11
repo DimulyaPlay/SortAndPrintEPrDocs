@@ -67,15 +67,15 @@ def multiplePagesPerSheet(filepath, mode):
             big_page = PyPDF2.pdf.PageObject.createBlankPage(width=595.2, height=842.88)
             big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i],
                                                       rotation=90,
-                                                      scale=0.68,
+                                                      scale=0.7,
                                                       tx=585.2,
                                                       ty=10)
             try:
                 big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i + 1],
                                                           rotation=90,
-                                                          scale=0.68,
+                                                          scale=0.7,
                                                           tx=585.2,
-                                                          ty=430)
+                                                          ty=420)
             except:
                 pass
             merged_file.addPage(big_page)
