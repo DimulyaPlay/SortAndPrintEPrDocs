@@ -8,9 +8,11 @@ from pikepdf import Pdf
 from difflib import SequenceMatcher
 import pdfplumber
 import os
+import subprocess
 import win32com.client
 import tempfile
 from PIL import Image
+import openpyxl
 
 a4orig = [612.1, 842.0]
 a4small = [i * 0.95 for i in a4orig]
@@ -157,6 +159,8 @@ def wordpdf(origfile):
 def imagepdf(origfile):
     # конвертация word в pdf открывает копию, и сохраняет в ориг
     convfile = f'{origfile}.pdf'
+    workbook = load_workbook(origfile, guess_types=True, data_only=True)
+    worksheet = workbook.active
     image = Image.open(origfile)
     image.convert('RGB')
     image.save(convfile)
@@ -197,4 +201,5 @@ def print_file(filepath, exe_path, currentprinter):
             jobs[4] = 1
         # print(jobs)
         win32print.ClosePrinter(phandle)
-    os.system("taskkill /im pdftoprinter.exe")
+    subprocess.call("taskkill.exe /im pdftoprinter.exe /f", shell=True)
+    # os.system("taskkill /im pdftoprinter.exe")

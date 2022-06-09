@@ -43,7 +43,11 @@ class main_sorter:
         doclist = [wordpdf(i) if i.endswith(('.doc', '.docx')) else i for i in basedoclist]
         doclist = [imagepdf(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
         protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
-        kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke')]
+        kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[')]
+        print(kvitanciya)
+        print(doclist)
+        print('----')
+        print(protlist)
         if not kvitanciya:
             no_kvitancii()
             return
@@ -59,11 +63,14 @@ class main_sorter:
             prots_similarity = {}
             if not protlist:
                 continue
+            print(i)
             for protpath in protlist:
                 protname = os.path.basename(protpath)
                 if protname.find(filename.rsplit('_na_', 1)[0][:76]) != -1 or protname.find(filename.rsplit('[', 1)[0][:76]) != -1:
                     similarity = similar(filename.rsplit('_na_', 1)[0][:76], protname[24:-4])
                     prots_similarity[protpath] = similarity
+                    print(similarity, protpath)
+            print(prots_similarity.values())
             maxsimilarity = max(zip(prots_similarity.values(), prots_similarity.keys()))[1]
             queue[file_id + 1] = os.path.basename(maxsimilarity)
             protlist.remove(maxsimilarity)
