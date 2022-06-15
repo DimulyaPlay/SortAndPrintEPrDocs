@@ -3,7 +3,6 @@ import win32api
 import win32print
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import PyPDF2
-from pdfstitcher import pdfstitcher
 from pikepdf import Pdf
 from difflib import SequenceMatcher
 import pdfplumber
@@ -12,7 +11,6 @@ import subprocess
 import win32com.client
 import tempfile
 from PIL import Image
-import openpyxl
 
 a4orig = [612.1, 842.0]
 a4small = [i * 0.95 for i in a4orig]
@@ -199,7 +197,5 @@ def print_file(filepath, exe_path, currentprinter):
                 jobs[3] = 1
         if file_printing not in docs_in_queue.keys() and jobs[0] == 1:  # "напечатан" flag
             jobs[4] = 1
-        # print(jobs)
         win32print.ClosePrinter(phandle)
     subprocess.call("taskkill.exe /im pdftoprinter.exe /f", shell=True)
-    # os.system("taskkill /im pdftoprinter.exe")

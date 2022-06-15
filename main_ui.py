@@ -1,3 +1,4 @@
+import datetime
 import os.path
 import sys
 from tkinter import *
@@ -6,6 +7,8 @@ from tkinterdnd2 import *
 from sorter_class import *
 import configparser
 from scrollable_frame import VerticalScrolledFrame
+
+ver = '3.1'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -194,9 +197,9 @@ def not_zip():
 
 
 def show_credits(e):
-    messagebox.showinfo("Кредитс",
-                        "Сортировка документов с сайта Электронное провосудие.\nАвтор: консультант Краснокамского гс "
-                        "Соснин Дмитрий.\nВерсия 3.1")
+    curdate = datetime.date.today().strftime("%d/%m/%Y")
+    messagebox.showinfo("Кредитс", message=f"Сортировка документов с сайта Электронное провосудие.\nАвтор: консультант Краснокамского гс "
+                        f"Соснин Дмитрий.\nВерсия {ver} от {curdate}")
 
 
 # main window
@@ -229,4 +232,3 @@ opt4 = StringVar()
 opt4.set(sorter.default_printer)
 
 root.mainloop()
-
