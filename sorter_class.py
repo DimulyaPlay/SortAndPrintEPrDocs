@@ -18,6 +18,7 @@ class main_sorter:
         self.deletezip = self.config_obj.get('DEFAULT', 'delete_zip')
         self.paperecomode = self.config_obj.get('DEFAULT', 'paper_eco_mode')
         self.print_directly = self.config_obj.get('DEFAULT', 'print_directly')
+        self.save_stat = self.config_obj.get('DEFAULT', 'save_stat')
         self.default_printer = self.config_obj.get('DEFAULT', 'default_printer')
         self.PDF_PRINT_FILE = self.config_obj.get('DEFAULT', 'PDF_PRINT_PATH')
 

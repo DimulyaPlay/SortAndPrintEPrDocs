@@ -3,6 +3,6 @@ PyPDF2~=1.26.0
 pywin32==303
 
 future~=0.18.2
-pdfstitcher~=0.6.1
 pikepdf~=5.1.2
 Pillow~=9.0.0
+pandas~=1.4.0

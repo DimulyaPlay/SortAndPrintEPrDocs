@@ -4,11 +4,14 @@ import sys
 from tkinter import *
 import win32print
 from tkinterdnd2 import *
+
+import stats_module
 from sorter_class import *
 import configparser
 from scrollable_frame import VerticalScrolledFrame
 
 ver = '3.1'
+curdate = '16/06/2022'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -17,16 +20,17 @@ elif __file__:
 
 # пути к скрипту и конфигу
 config_name = 'config.ini'
-stats_name = 'epr_stats.ini'
+stats_name = 'statistics.xlsx'
 PDF_PRINT_NAME = 'PDFtoPrinter.exe'
 printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]
-stats_path = os.path.join(application_path, stats_name)
+statfile_path = os.path.join(application_path, stats_name)
 config_path = os.path.join(application_path, config_name)
 PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)
 
 default_config = {'delete_zip': 'no',
                   'paper_eco_mode': 'yes',
                   'print_directly': 'no',
+                  'save_stat': 'no',
                   'default_printer': win32print.GetDefaultPrinter(),
                   'PDF_PRINT_PATH': PDF_PRINT_FILE,
                   }
@@ -51,6 +55,7 @@ def write_config_to_file(class_obj, config_obj):
     config_obj['DEFAULT']['delete_zip'] = class_obj.deletezip
     config_obj['DEFAULT']['paper_eco_mode'] = class_obj.paperecomode
     config_obj['DEFAULT']['print_directly'] = class_obj.print_directly
+    config_obj['DEFAULT']['save_stat'] = class_obj.save_stat
     config_obj['DEFAULT']['default_printer'] = class_obj.default_printer
     config_obj['DEFAULT']['PDF_PRINT_PATH'] = os.path.join(os.path.dirname(config_path),
                                                            'PDFtoPrinter.exe')  # Установить место хранения программы
@@ -60,6 +65,7 @@ def write_config_to_file(class_obj, config_obj):
 
 
 sorter = main_sorter(config=readcreateconfig(default_config, config_path), config_path=config_path)
+stat_counter = stats_module.stat_reader(statfile_path)
 
 
 def main_drop(event):
@@ -90,6 +96,7 @@ def apply(e=sorter):
     sorter.paperecomode = opt2.get()
     sorter.print_directly = opt3.get()
     sorter.default_printer = opt4.get()
+    sorter.save_stat = opt5.get()
     write_config_to_file(sorter, sorter.config_obj)
 
 
@@ -106,6 +113,9 @@ def show_settings(e):
 
     Checkbutton(settings, text="Печать на принтер",
                 variable=opt3,
+                onvalue='yes', offvalue='no', command=apply).pack(anchor=W)
+    Checkbutton(settings, text="Сохранять статистику",
+                variable=opt5,
                 onvalue='yes', offvalue='no', command=apply).pack(anchor=W)
     OptionMenu(settings, opt4, *printer_list, command=apply).pack(anchor=W)
     showcredits = Label(settings, text="  Автор  ", borderwidth=2, relief="groove")
@@ -178,14 +188,18 @@ def print_dialog():
     bottom_actions.pack()
     len_pages = StringVar()
     update_num_pages()
+    if sorter.save_stat=="yes":
+        save_to_stat_var = BooleanVar().set(1)
+        save_to_stat_chkbtn = Checkbutton(bottom_actions, variable=save_to_stat_var, text='Добавить в статистику')
+        save_to_stat_chkbtn.grid(column=0, row=0, sticky=S, padx=5, pady=2)
     open_folder_b = Label(bottom_actions, text=" Открыть папку ", borderwidth=2, relief="groove")
-    open_folder_b.grid(column=0, row=0, sticky=S, padx=5, pady=2)
+    open_folder_b.grid(column=1, row=0, sticky=S, padx=5, pady=2)
     open_folder_b.bind("<Button-1>", lambda event, a=os.path.dirname(winSt[0]): subprocess.Popen(f'explorer {a}'))
     print_b = Label(bottom_actions, text=" Печать ", borderwidth=2, relief="groove")
-    print_b.grid(column=1, row=0, sticky=S, padx=5, pady=2)
+    print_b.grid(column=2, row=0, sticky=S, padx=5, pady=2)
     print_b.bind("<Button-1>", apply_print)
     sum_pages = Label(bottom_actions, textvariable=len_pages)
-    sum_pages.grid(column=2, row=0, sticky=S, padx=5, pady=2)
+    sum_pages.grid(column=3, row=0, sticky=S, padx=5, pady=2)
 
 
 def show_printed():
@@ -197,7 +211,6 @@ def not_zip():
 
 
 def show_credits(e):
-    curdate = datetime.date.today().strftime("%d/%m/%Y")
     messagebox.showinfo("Кредитс", message=f"Сортировка документов с сайта Электронное провосудие.\nАвтор: консультант Краснокамского гс "
                         f"Соснин Дмитрий.\nВерсия {ver} от {curdate}")
 
@@ -230,5 +243,7 @@ opt3 = StringVar()
 opt3.set(sorter.print_directly)
 opt4 = StringVar()
 opt4.set(sorter.default_printer)
+opt5 = StringVar()
+opt5.set(sorter.save_stat)
 
 root.mainloop()
