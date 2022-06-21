@@ -139,9 +139,9 @@ def print_dialog():
         show_printed()
 
     def update_num_pages():
-        full_len = sum([sorter.num_pages[winSt[i]] for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
+        full_len = sum([sorter.num_pages[winSt[i]][0] for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         eco_len = sum(
-            [int(sorter.num_pages[winSt[i]] / 2 / (rbVariables[winSt[i]].get()) + 0.9) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
+            [int(sorter.num_pages[winSt[i]][0] / 2 / (rbVariables[winSt[i]].get()) + 0.9) for i in range(len(winSt)) if printcbVariables[winSt[i]].get()])
         string = f"Всего для печати страниц: {full_len}, листов: {eco_len}"
         len_pages.set(string)
 
@@ -171,7 +171,7 @@ def print_dialog():
         filenames[i] = Label(container, text=winSt_names[i], font='TkFixedFont')
         filenames[i].grid(column=1, row=i + 1, sticky=W)
         filenames[i].bind('<Double-Button-1>', lambda event, a=winSt[i]: os.startfile(a))
-        numpages[i] = Label(container, text=str(sorter.num_pages[winSt[i]]), padx=2)
+        numpages[i] = Label(container, text=str(sorter.num_pages[winSt[i]][0]), padx=2)
         numpages[i].grid(column=2, row=i + 1)
         rbVariables[winSt[i]] = IntVar()
         rbVariables[winSt[i]].set(1)
@@ -188,9 +188,10 @@ def print_dialog():
     bottom_actions.pack()
     len_pages = StringVar()
     update_num_pages()
-    if sorter.save_stat=="yes":
-        save_to_stat_var = BooleanVar().set(1)
-        save_to_stat_chkbtn = Checkbutton(bottom_actions, variable=save_to_stat_var, text='Добавить в статистику')
+    if sorter.save_stat == "yes":
+        statsaver = BooleanVar()
+        statsaver.set(1)
+        save_to_stat_chkbtn = Checkbutton(bottom_actions, variable=statsaver, text='Добавить в статистику', command=lambda: print(statsaver.get()))
         save_to_stat_chkbtn.grid(column=0, row=0, sticky=S, padx=5, pady=2)
     open_folder_b = Label(bottom_actions, text=" Открыть папку ", borderwidth=2, relief="groove")
     open_folder_b.grid(column=1, row=0, sticky=S, padx=5, pady=2)

@@ -137,7 +137,9 @@ def check_num_pages(path):
     # принимает строку - путь к файлу пдф, возвращает кол-во страниц
     pdf = Pdf.open(path)
     pages = len(pdf.pages)
-    return pages
+    papers = int(pages / 2 + 0.9)
+    pdf.close()
+    return [pages, papers]
 
 
 def wordpdf(origfile):
@@ -150,7 +152,11 @@ def wordpdf(origfile):
     word.Quit()
     os.remove(origfile)
     neworigfile = f'{origfile.rsplit(".")[0]}.pdf'
-    os.rename(convfile, neworigfile)
+    try:
+        os.rename(convfile, neworigfile)
+    except:
+        neworigfile = f'{origfile.rsplit(".")[0]}..pdf'
+        os.rename(convfile, neworigfile)
     return neworigfile
 
 
