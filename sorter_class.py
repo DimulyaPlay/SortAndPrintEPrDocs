@@ -1,8 +1,7 @@
+from datetime import datetime
 import glob
 import random
 import subprocess
-import time
-from tkinter import messagebox
 from zipfile import ZipFile
 from sort_utils import *
 
@@ -46,7 +45,6 @@ class main_sorter:
         protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
         kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[')]
         if not kvitanciya:
-            no_kvitancii()
             return
         doc_list = extracttext(kvitanciya)
         queue = {}
@@ -81,24 +79,15 @@ class main_sorter:
             else:
                 if i + 1 in all_keys:
                     if queue[i + 1].startswith('Protokol_proverki_fayla_'):
-                        # print("Протокол есть для файла: ", queue[i])
                         merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
-                                                  '{0}\\{1}'.format(foldername, queue[i + 1]),
-                                                  self.print_directly)
-                        broken = 0
-                        if not broken:
-                            os.remove('{0}\\{1}'.format(foldername, queue[i]))
-                            os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
+                                                  '{0}\\{1}'.format(foldername, queue[i + 1]))
+                        os.remove('{0}\\{1}'.format(foldername, queue[i]))
+                        os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
                         queue_files.append(merged_file)
                         queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
-                        # if broken:
-                        #     queue_files.append('{0}\\{1}'.format(foldername, queue[i + 1]))
-                        #     counter += 1
-                        #     queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i + 1])
                         counter += 1
                 else:
                     if not queue[i].startswith('Protokol_proverki_fayla_'):
-                        # print("Протокола нет для файла: ", queue[i])
                         queue_files.append('{0}\\{1}'.format(foldername, queue[i]))
                         queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
                         counter += 1
@@ -109,9 +98,15 @@ class main_sorter:
                 os.replace(i, j)
                 self.num_pages[j] = check_num_pages(j)
                 self.files_for_print.append(j)
+        if self.save_stat == 'yes':
+            docnumber = os.path.basename(givenpath).split('_', 1)[0]
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            self.stats_list = [dt_string]
+            self.stats_list.append(docnumber)
+            self.stats_list.append(len(self.files_for_print))
+            self.stats_list.append(sum(i[0] for i in self.num_pages.values()))
+            self.stats_list.append(sum(i[1] for i in self.num_pages.values()))
+        print(self.stats_list)
         if self.print_directly == 'no':
             subprocess.Popen(f'explorer {foldername}')
-
-
-def no_kvitancii():
-    messagebox.showinfo("Варнинг", "В архиве не обнаружена квитанция.")

@@ -16,18 +16,20 @@ a4orig = [612.1, 842.0]
 a4small = [i * 0.95 for i in a4orig]
 
 
-def concat_pdfs(main_pdf_filepath, slave_pdf_filepath, print_directly):
+def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
     # присоединение второго пдф файла к первому
     file_main = Pdf.open(main_pdf_filepath)
     file_slave = Pdf.open(slave_pdf_filepath)
     file_main.pages.extend(file_slave.pages)
     outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
     file_main.save(outpath)
+    file_main.close()
+    file_slave.close()
     return outpath
 
 
-def fitPdfInA4(fp):
-    pdf = PdfFileReader(fp)
+def fitPdfInA4(pdfpath):
+    pdf = PdfFileReader(pdfpath)
     new_pdf = PdfFileWriter()
     for page in pdf.pages:
         page_width = page.mediaBox.getWidth()
@@ -46,7 +48,6 @@ def fitPdfInA4(fp):
             padx = oldpage.mediaBox.getWidth() / 2
             pady = oldpage.mediaBox.getHeight() / 2
             page.mergeTranslatedPage(oldpage, 306 - padx, 421 - pady)
-            # print(os.path.basename(fp), 'scaled by', min_koef)
         new_pdf.addPage(page)
     fd, outpath = tempfile.mkstemp('.pdf')
     os.close(fd)
@@ -161,7 +162,7 @@ def wordpdf(origfile):
 
 
 def imagepdf(origfile):
-    # конвертация word в pdf открывает копию, и сохраняет в ориг
+    # конвертация картинку в pdf открывает копию, и сохраняет в ориг
     convfile = f'{origfile}.pdf'
     workbook = load_workbook(origfile, guess_types=True, data_only=True)
     worksheet = workbook.active

@@ -1,7 +1,7 @@
-import datetime
 import os.path
 import sys
 from tkinter import *
+from tkinter import messagebox
 import win32print
 from tkinterdnd2 import *
 
@@ -11,7 +11,7 @@ import configparser
 from scrollable_frame import VerticalScrolledFrame
 
 ver = '3.1'
-curdate = '16/06/2022'
+curdate = '23/06/2022'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -65,11 +65,12 @@ def write_config_to_file(class_obj, config_obj):
 
 
 sorter = main_sorter(config=readcreateconfig(default_config, config_path), config_path=config_path)
-stat_counter = stats_module.stat_reader(statfile_path)
+if sorter.save_stat == 'yes':
+    stat_counter = stats_module.stat_reader(statfile_path)
 
 
 def main_drop(event):
-    if ' ' in event.data:
+    if '{' in event.data:
         path = event.data[1:-1]
     else:
         path = event.data
@@ -136,6 +137,10 @@ def print_dialog():
         for i, j in printcbVariables.items():
             if j.get():
                 print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE, sorter.default_printer)
+        if sorter.save_stat == 'yes' and statsaver.get():
+            print('saving to stats')
+            stat_counter.addstats(sorter.stats_list)
+            stat_counter.savestat()
         show_printed()
 
     def update_num_pages():
