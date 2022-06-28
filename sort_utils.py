@@ -152,11 +152,11 @@ def wordpdf(origfile):
     doc.Close()
     word.Quit()
     os.remove(origfile)
-    neworigfile = f'{origfile.rsplit(".")[0]}.pdf'
+    neworigfile = f'{origfile.rsplit(".",1)[0]}.pdf'
     try:
         os.rename(convfile, neworigfile)
     except:
-        neworigfile = f'{origfile.rsplit(".")[0]}..pdf'
+        neworigfile = f'{origfile.rsplit(".",1)[0]}..pdf'
         os.rename(convfile, neworigfile)
     return neworigfile
 
@@ -170,7 +170,7 @@ def imagepdf(origfile):
     image.convert('RGB')
     image.save(convfile)
     os.remove(origfile)
-    neworigfile = f'{origfile.rsplit(".")[0]}.pdf'
+    neworigfile = f'{origfile.rsplit(".",1)[0]}.pdf'
     os.rename(convfile, neworigfile)
     return neworigfile
 
