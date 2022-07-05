@@ -10,8 +10,8 @@ from sorter_class import *
 import configparser
 from scrollable_frame import VerticalScrolledFrame
 
-ver = '3.3'
-curdate = '28/06/2022'
+ver = '3.3.3'
+curdate = '05/07/2022'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -146,6 +146,7 @@ def print_dialog():
             sorterClass.stats_list.append(eco_dupl_len_for_print_var.get())
             sorterClass.stats_list.append(full_dupl_len_for_print_var.get()-eco_dupl_len_for_print_var.get())
             stat_writer.addstats(sorterClass.stats_list)
+            stat_writer.savestat()
         info_show_printed()
 
     def update_num_pages():

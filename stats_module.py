@@ -17,7 +17,8 @@ class stat_reader:
 
     def addstats(self, statrow):
         row_for_concat = {i:j for i,j in zip(self.columns, statrow)}
-        self.statfile = self.statfile.append([row_for_concat], ignore_index=True)
+        df_for_concat = pd.DataFrame([row_for_concat])
+        self.statfile = pd.concat([self.statfile, df_for_concat])
 
     def savestat(self):
         self.statfile.to_excel(self.statfile_path, index=False)
