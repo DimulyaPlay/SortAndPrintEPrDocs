@@ -57,6 +57,8 @@ def fitPdfInA4(pdfpath):
 
 
 def multiplePagesPerSheet(filepath, mode):
+    if os.path.basename(filepath)[3:].startswith('Kvitantsiya_ob_otpravke['):
+        return filepath
     if mode == 1:
         return fitPdfInA4(filepath)
     merged_file = PdfFileWriter()

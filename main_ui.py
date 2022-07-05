@@ -98,6 +98,8 @@ def apply(e=sorterClass):
     sorterClass.print_directly = opt3Print.get()
     sorterClass.default_printer = opt4DefPrinter.get()
     sorterClass.save_stat = opt5SaveStat.get()
+    if sorterClass.save_stat == 'yes':
+        stat_writer = stats_module.stat_reader(statfile_path)
     write_config_to_file(sorterClass, sorterClass.config_obj)
 
 
@@ -144,7 +146,6 @@ def print_dialog():
             sorterClass.stats_list.append(eco_dupl_len_for_print_var.get())
             sorterClass.stats_list.append(full_dupl_len_for_print_var.get()-eco_dupl_len_for_print_var.get())
             stat_writer.addstats(sorterClass.stats_list)
-            stat_writer.savestat()
         info_show_printed()
 
     def update_num_pages():
