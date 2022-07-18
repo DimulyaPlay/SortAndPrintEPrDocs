@@ -19,13 +19,14 @@ a4small = [i * 0.95 for i in a4orig]
 def concat_pdfs(main_pdf_filepath, slave_pdf_filepath):
     # присоединение второго пдф файла к первому
     file_main = Pdf.open(main_pdf_filepath)
+    is_paper_eco = int(len(file_main.pages) % 2)
     file_slave = Pdf.open(slave_pdf_filepath)
     file_main.pages.extend(file_slave.pages)
     outpath = f"{main_pdf_filepath[:-4]}+protocol.pdf"
     file_main.save(outpath)
     file_main.close()
     file_slave.close()
-    return outpath
+    return outpath, is_paper_eco
 
 
 def fitPdfInA4(pdfpath):

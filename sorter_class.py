@@ -68,28 +68,34 @@ class main_sorter:
 
         queue_files = []
         queue_num_files = []
+        self.num_protocols_eco = {}
         counter = 0
         all_keys = sorted(queue.keys())
         for i in sorted(queue.keys()):
-            if self.paperecomode == "no":
+            if self.paperecomode == "no":  # Если не экомод просто нумеруем файлы и протоколы, подставляя переменную count
                 queue_files.append('{0}\\{1}'.format(foldername, queue[i]))
+                self.num_protocols_eco[foldername + '\\' + f'{counter:02}_' + queue[i]] = 0
                 queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
                 if os.path.exists('{0}\\{1}'.format(foldername, queue[i])):
                     counter += 1
             else:
-                if i + 1 in all_keys:
-                    if queue[i + 1].startswith('Protokol_proverki_fayla_'):
-                        merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
+                if i + 1 in all_keys:  # Если экомод, то проверяем есть ли протокол для файла
+                    if queue[i + 1].startswith('Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
+                        merged_file, is_paper_eco = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
                                                   '{0}\\{1}'.format(foldername, queue[i + 1]))
                         os.remove('{0}\\{1}'.format(foldername, queue[i]))
                         os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
                         queue_files.append(merged_file)
-                        queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
+                        numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
+                        queue_num_files.append(numered_file)
+                        self.num_protocols_eco[numered_file] = is_paper_eco
                         counter += 1
                 else:
                     if not queue[i].startswith('Protokol_proverki_fayla_'):
                         queue_files.append('{0}\\{1}'.format(foldername, queue[i]))
-                        queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
+                        numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
+                        queue_num_files.append(numered_file)
+                        self.num_protocols_eco[numered_file] = 0
                         counter += 1
         self.files_for_print = []
 
@@ -103,10 +109,11 @@ class main_sorter:
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
             self.stats_list = [dt_string]
-            self.stats_list.append(docnumber)
-            self.stats_list.append(len(self.files_for_print))
-            self.stats_list.append(sum(i[0] for i in self.num_pages.values()))
-            self.stats_list.append(sum(i[1] for i in self.num_pages.values()))
+            self.stats_list.append(docnumber)                                   # № доков
+            self.stats_list.append(len(self.files_for_print))                   # кол-во доков
+            self.stats_list.append(sum(i[0] for i in self.num_pages.values()))  # кол-во страниц во всех доках
+            self.stats_list.append(sum(i[1] for i in self.num_pages.values()))  # кол-во листов во всех доках
+            # self.stats_list.append(sum(i for i in num_protocols_eco.values()))  # кол-во протоколов, которые сэкономили листы
         print(self.stats_list)
         if self.print_directly == 'no':
             subprocess.Popen(f'explorer {foldername}')

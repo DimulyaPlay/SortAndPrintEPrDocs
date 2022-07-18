@@ -11,7 +11,7 @@ import configparser
 from scrollable_frame import VerticalScrolledFrame
 
 ver = '3.3.3'
-curdate = '05/07/2022'
+curdate = '2022/07/05'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -142,9 +142,9 @@ def print_dialog():
         if sorterClass.save_stat == 'yes' and statsaver.get():
             print('saving to stats')
             sorterClass.stats_list.append(num_docs_for_print.get())
-            sorterClass.stats_list.append(full_dupl_len_for_print_var.get())
+            sorterClass.stats_list.append(full_dupl_len_for_print_var.get() + eco_protocols_var.get())
             sorterClass.stats_list.append(eco_dupl_len_for_print_var.get())
-            sorterClass.stats_list.append(full_dupl_len_for_print_var.get()-eco_dupl_len_for_print_var.get())
+            sorterClass.stats_list.append(full_dupl_len_for_print_var.get()-eco_dupl_len_for_print_var.get()+eco_protocols_var.get())
             stat_writer.addstats(sorterClass.stats_list)
             stat_writer.savestat()
         info_show_printed()
@@ -153,11 +153,14 @@ def print_dialog():
         full_len_pages = sum([sorterClass.num_pages[filepathsForPrint[i]][0] for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
         eco_dupl_len_for_print = sum([int(sorterClass.num_pages[filepathsForPrint[i]][0] / 2 / (rbVariables[filepathsForPrint[i]].get()) + 0.9) for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
         full_dupl_len_for_print = sum([int(sorterClass.num_pages[filepathsForPrint[i]][0] / 2 + 0.9) for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
+        eco_protocols = sum([sorterClass.num_protocols_eco[filepathsForPrint[i]] for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
+        print(eco_protocols)
         string_num_docs = sum([1 for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
         string_pages_papers = f"Всего для печати страниц: {full_len_pages}, листов: {eco_dupl_len_for_print}"
         num_docs_for_print.set(string_num_docs)
         eco_dupl_len_for_print_var.set(eco_dupl_len_for_print)
         full_dupl_len_for_print_var.set(full_dupl_len_for_print)
+        eco_protocols_var.set(eco_protocols)
         dialog.title(f'Документов на печать {num_docs_for_print.get()}')
         len_pages.set(string_pages_papers)
 
@@ -207,6 +210,7 @@ def print_dialog():
     full_len_pages_for_print_var = IntVar()
     eco_dupl_len_for_print_var = IntVar()
     full_dupl_len_for_print_var = IntVar()
+    eco_protocols_var = IntVar()
     update_num_pages()
     if sorterClass.save_stat == "yes":
         statsaver = BooleanVar()
