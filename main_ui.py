@@ -10,7 +10,7 @@ from scrollable_frame import VerticalScrolledFrame
 from sorter_class import *
 from stats_module import stat_loader
 
-ver = '3.4.2'
+ver = '3.4.3'
 curdate = '2022/07/22'
 
 if getattr(sys, 'frozen', False):
@@ -93,6 +93,12 @@ def show_settings(e):
 	opengh = Label(settings, text = " GitHub ", borderwidth = 2, relief = "groove")
 	opengh.pack(anchor = S, padx = 2, pady = 2, fill = X)
 	opengh.bind("<Button-1>", lambda e:os.startfile('https://github.com/DimulyaPlay/SortAndPrintEPrDocs'))
+	opengstat = Label(settings, text = "Просмотр статистики", borderwidth = 2, relief = "groove")
+	opengstat.pack(anchor = S, padx = 2, pady = 2, fill = X)
+	opengstat.bind("<Button-1>", lambda e:os.startfile(statfile_path))
+	opengstat = Label(settings, text = "Просмотр конфига", borderwidth = 2, relief = "groove")
+	opengstat.pack(anchor = S, padx = 2, pady = 2, fill = X)
+	opengstat.bind("<Button-1>", lambda e:os.startfile(config_path))
 
 
 def print_dialog():
