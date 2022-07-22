@@ -7,7 +7,7 @@ from sort_utils import *
 
 
 class main_sorter:
-	def __init__(self, config):
+	def __init__(self, config, stat = False):
 		"""
 		:argument
 		config - экземпляр объекта корфигурации
@@ -15,18 +15,8 @@ class main_sorter:
 		Создает атрибуты касса из объекта конфигурации
 		Функции из других модулей используют эти атрибуты
 		"""
-		self.config_obj = config
-		self.read_vars_from_config()
-
-	def read_vars_from_config(self):
-		# Чтение переменных из конфига
-		self.deletezip = self.config_obj.get('DEFAULT', 'delete_zip')  # Удалять ли архив
-		self.paperecomode = self.config_obj.get('DEFAULT', 'paper_eco_mode')  # Режим экономии бумаги
-		self.print_directly = self.config_obj.get('DEFAULT', 'print_directly')  # Прямая печать на принтер
-		self.save_stat = self.config_obj.get('DEFAULT', 'save_stat')  # Сохранение статистики в файл
-		self.default_printer = self.config_obj.get('DEFAULT', 'default_printer')  # Принтер по умолчанию для программы
-		self.PDF_PRINT_FILE = self.config_obj.get('DEFAULT', 'PDF_PRINT_PATH')  # Путь для программы PDFPrint
-		self.gui_opacity = self.config_obj.get('DEFAULT', "opacity")  # Прозрачность основного окна
+		self.config = config
+		self.stat = stat if stat else None
 
 	def agregate_file(self, givenpath):
 		"""
@@ -49,7 +39,7 @@ class main_sorter:
 			foldername = foldername + str(random.randint(1, 999))
 		with ZipFile(givenpath, 'r') as zipObj:
 			zipObj.extractall(foldername)
-		if self.deletezip == 'yes':
+		if self.config.deletezip == 'yes':
 			os.remove(givenpath)
 		siglist = glob.glob("{0}{1}*.sig".format(foldername, os.sep))
 		for i in siglist:
@@ -93,7 +83,7 @@ class main_sorter:
 		counter = 0
 		all_keys = sorted(queue.keys())
 		for i in sorted(queue.keys()):
-			if self.paperecomode == "no":  # Если не экомод просто нумеруем файлы и протоколы, подставляя переменную count
+			if self.config.paperecomode == "no":  # Если не экомод просто нумеруем файлы и протоколы, подставляя переменную count
 				queue_files.append('{0}\\{1}'.format(foldername, queue[i]))
 				self.num_protocols_eco[foldername + '\\' + f'{counter:02}_' + queue[i]] = 0
 				queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
@@ -126,15 +116,14 @@ class main_sorter:
 				os.replace(i, j)
 				self.num_pages[j] = check_num_pages(j)
 				self.files_for_print.append(j)
-		if self.save_stat == 'yes':
+		if self.config.save_stat == 'yes':
 			docnumber = os.path.basename(givenpath).split('_', 1)[0]
 			now = datetime.now()
 			dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-			self.stats_list = [dt_string]
-			self.stats_list.append(docnumber)  # № доков
-			self.stats_list.append(len(self.files_for_print))  # кол-во доков
-			self.stats_list.append(sum(i[0] for i in self.num_pages.values()))  # кол-во страниц во всех доках
-			self.stats_list.append(sum(i[1] for i in self.num_pages.values()))  # кол-во листов во всех дока
-		print(self.stats_list)
-		if self.print_directly == 'no':
+			self.stat.statdict['Дата и время'] = dt_string
+			self.stat.statdict['Номер'] = docnumber
+			self.stat.statdict['Кол-во док-ов'] = (len(self.files_for_print))
+			self.stat.statdict['Кол-во страниц в документах'] = (sum(i[0] for i in self.num_pages.values()))
+			self.stat.statdict['Кол-во листов в документах'] = (sum(i[1] for i in self.num_pages.values()))
+		if self.config.print_directly == 'no':
 			subprocess.Popen(f'explorer {foldername}')

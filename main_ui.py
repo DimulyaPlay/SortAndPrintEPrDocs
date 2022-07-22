@@ -1,4 +1,3 @@
-import configparser
 import os.path
 import sys
 from tkinter import *
@@ -6,12 +5,13 @@ from tkinter import messagebox
 
 from tkinterdnd2 import *
 
-import stats_module
+from config_loader import config_file
 from scrollable_frame import VerticalScrolledFrame
 from sorter_class import *
+from stats_module import stat_loader
 
-ver = '3.4.0'
-curdate = '2022/07/21'
+ver = '3.4.2'
+curdate = '2022/07/22'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -25,50 +25,13 @@ printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LO
 statfile_path = os.path.join(application_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(application_path, config_name)  # полный путь файла конфигурации
 PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)  # полный путь программы для печати
-default_config = {'delete_zip':'no', 'paper_eco_mode':'yes', 'print_directly':'yes', 'save_stat':'yes',
-				  'default_printer':win32print.GetDefaultPrinter(), 'PDF_PRINT_PATH':PDF_PRINT_FILE, 'opacity':60}
-
-
-def readcreateconfig(default_config, config_path):
-	"""
-	Чтение конфига или создание конфига по-умолчанию, если не обнаружен
-	:param default_config: словарь - конфигурация по-умочанию
-	:param config_path:  путь к конфигу
-	:return: экзмпляр объекта configparser
-	"""
-	config = configparser.ConfigParser()
-	if not os.path.exists(config_path):
-		config['DEFAULT'] = default_config
-		with open(config_path, 'w') as configfile:
-			config.write(configfile)
-		print('default config created')
-	else:
-		config.read(config_path)
-		print('config read')
-	return config
-
-
-def write_config_to_file(class_obj, config_obj):
-	"""
-	Запись в файл параметров конфигурации
-	:param class_obj: экземпляр объекта класса sorter_class
-	:param config_obj: экземпляр объекта класса configparcer
-	"""
-	config_obj['DEFAULT']['delete_zip'] = class_obj.deletezip
-	config_obj['DEFAULT']['paper_eco_mode'] = class_obj.paperecomode
-	config_obj['DEFAULT']['print_directly'] = class_obj.print_directly
-	config_obj['DEFAULT']['save_stat'] = class_obj.save_stat
-	config_obj['DEFAULT']['default_printer'] = class_obj.default_printer
-	config_obj['DEFAULT']['PDF_PRINT_PATH'] = os.path.join(os.path.dirname(config_path), 'PDFtoPrinter.exe')
-	config_obj['DEFAULT']['opacity'] = class_obj.gui_opacity
-	print('saved')
-	with open(config_path, 'w') as configfile:
-		config_obj.write(configfile)
-
-
-sorterClass = main_sorter(config = readcreateconfig(default_config, config_path))
-if sorterClass.save_stat == 'yes':
-	stat_writer = stats_module.stat_reader(statfile_path)
+config_paths = [config_path, PDF_PRINT_FILE]
+current_config = config_file(config_paths)
+if current_config.save_stat == 'yes':
+	stat_writer = stat_loader(statfile_path)
+	sorterClass = main_sorter(current_config, stat = stat_writer)
+else:
+	sorterClass = main_sorter(current_config)
 
 
 def main_drop(event):
@@ -80,7 +43,7 @@ def main_drop(event):
 		warning_not_zip()
 		return
 	sorterClass.agregate_file(path)
-	if sorterClass.print_directly == "yes":
+	if current_config.print_directly == "yes":
 		print_dialog()
 
 
@@ -93,18 +56,18 @@ def quitter(e):
 	root.destroy()
 
 
-def apply(e = sorterClass):
+def apply(e = current_config):
 	# Set main class vars from checkbuttons
-	sorterClass.deletezip = opt1DelZip.get()
-	sorterClass.paperecomode = opt2EcoMode.get()
-	sorterClass.print_directly = opt3Print.get()
-	sorterClass.default_printer = opt4DefPrinter.get()
-	sorterClass.save_stat = opt5SaveStat.get()
-	sorterClass.gui_opacity = opt5Opacity.get()
-	if sorterClass.save_stat == 'yes':
-		stat_writer = stats_module.stat_reader(statfile_path)
-	root.attributes('-alpha', (int(sorterClass.gui_opacity) / 100))
-	write_config_to_file(sorterClass, sorterClass.config_obj)
+	current_config.deletezip = opt1DelZip.get()
+	current_config.paperecomode = opt2EcoMode.get()
+	current_config.print_directly = opt3Print.get()
+	current_config.default_printer = opt4DefPrinter.get()
+	current_config.save_stat = opt5SaveStat.get()
+	current_config.gui_opacity = opt5Opacity.get()
+	if current_config.save_stat == 'yes':
+		stat_writer = stat_loader(statfile_path)
+	root.attributes('-alpha', (int(current_config.gui_opacity) / 100))
+	current_config.write_config_to_file()
 
 
 def show_settings(e):
@@ -142,15 +105,15 @@ def print_dialog():
 		for i, j in printcbVariables.items():
 			if j.get():
 				print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE, sorterClass.default_printer)
-		if sorterClass.save_stat == 'yes' and statsaver.get():
+		if current_config.save_stat == 'yes' and statsaver.get():
 			print('saving to stats')
-			sorterClass.stats_list.append(num_docs_for_print.get())
-			sorterClass.stats_list.append(full_dupl_len_for_print_var.get() + eco_protocols_var.get())
-			sorterClass.stats_list.append(eco_dupl_len_for_print_var.get())
-			sorterClass.stats_list.append(
-				full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get())
-			stat_writer.addstats(sorterClass.stats_list)
-			stat_writer.savestat()
+			stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
+			stat_writer.statdict[
+				'Затрата без эко была бы'] = full_dupl_len_for_print_var.get() + eco_protocols_var.get()
+			stat_writer.statdict['Затрачено листов'] = eco_dupl_len_for_print_var.get()
+			stat_writer.statdict[
+				'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
+			stat_writer.add_and_save_stats()
 		info_show_printed()
 
 	def update_num_pages():
@@ -232,7 +195,7 @@ def print_dialog():
 	full_dupl_len_for_print_var = IntVar()
 	eco_protocols_var = IntVar()
 	update_num_pages()
-	if sorterClass.save_stat == "yes":
+	if current_config.save_stat == "yes":
 		statsaver = BooleanVar()
 		statsaver.set(1)
 		save_to_stat_chkbtn = Checkbutton(bottom_actions, variable = statsaver, text = 'Добавить в статистику',
@@ -263,12 +226,16 @@ def info_show_credits(e):
 								  f"Соснин Дмитрий.\nВерсия {ver} от {curdate}")
 
 
+def color_config(widget, color, event):
+	widget.configure(foreground = color)
+
+
 # main window
 root = Tk()
 root.geometry('38x50')
 root.overrideredirect(True)
 root.attributes('-topmost', True)
-root.attributes('-alpha', (int(sorterClass.gui_opacity) / 100))
+root.attributes('-alpha', (int(current_config.gui_opacity) / 100))
 
 title_bar = Frame(root, bd = 0)
 title_bar.pack(expand = 0, fill = X)
@@ -289,15 +256,15 @@ dropzone.drop_target_register(DND_FILES)
 dropzone.dnd_bind('<<Drop>>', main_drop)
 
 opt1DelZip = StringVar()
-opt1DelZip.set(sorterClass.deletezip)
+opt1DelZip.set(current_config.deletezip)
 opt2EcoMode = StringVar()
-opt2EcoMode.set(sorterClass.paperecomode)
+opt2EcoMode.set(current_config.paperecomode)
 opt3Print = StringVar()
-opt3Print.set(sorterClass.print_directly)
+opt3Print.set(current_config.print_directly)
 opt4DefPrinter = StringVar()
-opt4DefPrinter.set(sorterClass.default_printer)
+opt4DefPrinter.set(current_config.default_printer)
 opt5SaveStat = StringVar()
-opt5SaveStat.set(sorterClass.save_stat)
+opt5SaveStat.set(current_config.save_stat)
 opt5Opacity = StringVar()
-opt5Opacity.set(sorterClass.gui_opacity)
+opt5Opacity.set(current_config.gui_opacity)
 root.mainloop()

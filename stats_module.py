@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 
-class stat_reader:
+class stat_loader:
 
 	def __init__(self, statfile_path):
 		"""
@@ -21,18 +21,12 @@ class stat_reader:
 			self.statfile = pd.DataFrame(columns = self.columns)
 			self.savestat()
 			print('statfile created')
+		self.statdict = {i:0 for i in self.columns}
 
-	def addstats(self, statrow):
+	def add_and_save_stats(self):
 		"""
 		Добавление в файл статистики очередной строки
-		:param statrow: лист со статистическими данными по количеству столбцов
 		"""
-		row_for_concat = {i:j for i, j in zip(self.columns, statrow)}
-		df_for_concat = pd.DataFrame([row_for_concat])
+		df_for_concat = pd.DataFrame([self.statdict])
 		self.statfile = pd.concat([self.statfile, df_for_concat])
-
-	def savestat(self):
-		"""
-		Сохранение файла статистики
-		"""
 		self.statfile.to_excel(self.statfile_path, index = False)
