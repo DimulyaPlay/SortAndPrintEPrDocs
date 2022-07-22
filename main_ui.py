@@ -110,7 +110,8 @@ def print_dialog():
 	def apply_print(e):
 		for i, j in printcbVariables.items():
 			if j.get():
-				print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE, sorterClass.default_printer)
+				print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE,
+						   current_config.default_printer)
 		if current_config.save_stat == 'yes' and statsaver.get():
 			print('saving to stats')
 			stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
