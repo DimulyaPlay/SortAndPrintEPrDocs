@@ -12,7 +12,7 @@ from scrollable_frame import VerticalScrolledFrame
 from sorter_class import *
 from stats_module import stat_loader
 
-ver = '3.4.3'
+ver = '3.4.4'
 curdate = '2022/07/27'
 
 if getattr(sys, 'frozen', False):

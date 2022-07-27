@@ -19,7 +19,7 @@ class stat_loader:
 			print('statfile read')
 		else:
 			self.statfile = pd.DataFrame(columns = self.columns)
-			self.savestat()
+			self.statfile.to_excel(self.statfile_path, index = False)
 			print('statfile created')
 		self.statdict = {i:0 for i in self.columns}
 
