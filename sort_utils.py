@@ -1,3 +1,4 @@
+import glob
 import os
 import subprocess
 import tempfile
@@ -5,6 +6,7 @@ import time
 from difflib import SequenceMatcher
 
 import PyPDF2
+import patoolib
 import pdfplumber
 import win32api
 import win32com.client
@@ -190,8 +192,6 @@ def imagepdf(origfile):
 	:return: путь к файлу
 	"""
 	convfile = f'{origfile}.pdf'
-	workbook = load_workbook(origfile, guess_types = True, data_only = True)
-	worksheet = workbook.active
 	image = Image.open(origfile)
 	image.convert('RGB')
 	image.save(convfile)
@@ -232,3 +232,37 @@ def print_file(filepath, exe_path, currentprinter):
 			jobs[4] = 1
 		win32print.ClosePrinter(phandle)
 	subprocess.call("taskkill.exe /im pdftoprinter.exe /f", shell = True)
+
+
+def parse_names(names: str):
+	"""
+	Разбор входящей строкии на имена мсг файлов
+	:param names: входящая строка
+	:return: лист из путей к файлам
+	"""
+	namesstart = 0
+	nameslist = []
+	while namesstart != -1:
+		namesstart = names.find('C:/')
+		namesend = names.find('.msg')
+		foundname = names[namesstart:namesend + 4]
+		if len(foundname) > 5:
+			nameslist.append(foundname)
+			names = names[namesend + 4:]
+	return nameslist
+
+
+def unpack_archieved_files(path):
+	tempdir = tempfile.mkdtemp()
+	total_files = []
+	total_names = []
+	patoolib.extract_archive(path, outdir = tempdir)
+	extracted_files = glob.glob(tempdir + '/**/*', recursive = True)
+	print(total_files)
+	total_files.extend(extracted_files)
+	for ex_file in extracted_files:
+		if ex_file.lower().endswith(('.zip', '7z', 'rar')):
+			files, names = unpack_archieved_files(ex_file)
+			total_files.extend(files)
+	total_names = [os.path.basename(i) for i in total_files]
+	return total_files, total_names
