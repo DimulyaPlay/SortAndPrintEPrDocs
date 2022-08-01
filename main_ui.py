@@ -1,9 +1,9 @@
 import os.path
-import sys
 from functools import partial
 from tkinter import *
 from tkinter import messagebox
 
+import win32print
 from tkinterdnd2 import *
 
 from config_loader import config_file
@@ -20,6 +20,7 @@ if getattr(sys, 'frozen', False):
 elif __file__:
 	application_path = os.path.dirname(__file__)
 
+license_name = 'PDFTron_license_key.txt'  # название файла с лицензией
 config_name = 'config.ini'  # название файла конфигурации
 stats_name = 'statistics.xlsx'  # название файла статистики
 PDF_PRINT_NAME = 'PDFtoPrinter.exe'  # название файла программы для печати
@@ -27,9 +28,14 @@ printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LO
 statfile_path = os.path.join(application_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(application_path, config_name)  # полный путь файла конфигурации
 PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)  # полный путь программы для печати
+license_path = os.path.join(application_path, license_name)
 config_paths = [config_path, PDF_PRINT_FILE]
 
 current_config = config_file(config_paths)
+
+with open(license_path, 'r') as lic:
+	LICENSE_KEY = lic.readline()
+initPDFTron(LICENSE_KEY)
 
 if current_config.save_stat == 'yes':
 	stat_writer = stat_loader(statfile_path)
@@ -119,8 +125,8 @@ def print_dialog():
 	def apply_print(e):
 		for i, j in printcbVariables.items():
 			if j.get():
-				print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE,
-						   current_config.default_printer)
+				print_file(i, rbVariables[i].get(),
+						   current_config.default_printer)  # print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE,  # 		   current_config.default_printer)
 		if current_config.save_stat == 'yes' and statsaver.get():
 			print('saving to stats')
 			stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()

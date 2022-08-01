@@ -1,4 +1,3 @@
-import glob
 import random
 from datetime import datetime
 from zipfile import ZipFile
@@ -95,7 +94,7 @@ class main_sorter:
 							'Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
 						merged_file, is_paper_eco = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
 																'{0}\\{1}'.format(foldername, queue[i + 1]))
-						os.remove('{0}\\{1}'.format(foldername, queue[i]))
+						# os.remove('{0}\\{1}'.format(foldername, queue[i]))
 						os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
 						queue_files.append(merged_file)
 						numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
