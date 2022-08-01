@@ -192,12 +192,23 @@ def imagepdf(origfile):
 	:return: путь к файлу
 	"""
 	convfile = f'{origfile}.pdf'
-	image = Image.open(origfile)
-	image.convert('RGB')
-	image.save(convfile)
-	os.remove(origfile)
-	neworigfile = f'{origfile.rsplit(".", 1)[0]}.pdf'
-	os.rename(convfile, neworigfile)
+	if origfile.endswith('.png'):
+		image = Image.open(origfile)
+		if image.width > image.height:
+			print('rotating')
+			image.rotate(270)
+		image.convert('RGB')
+		image.save(convfile)
+		os.remove(origfile)
+		neworigfile = f'{origfile.rsplit(".", 1)[0]}.pdf'
+		os.rename(convfile, neworigfile)
+		return neworigfile
+	else:
+		convfile = f'{origfile}.png'
+		image = Image.open(origfile)
+		image.convert('RGB')
+		image.save(convfile)
+		neworigfile = imagepdf(convfile)
 	return neworigfile
 
 
@@ -258,7 +269,6 @@ def unpack_archieved_files(path):
 	total_names = []
 	patoolib.extract_archive(path, outdir = tempdir)
 	extracted_files = glob.glob(tempdir + '/**/*', recursive = True)
-	print(total_files)
 	total_files.extend(extracted_files)
 	for ex_file in extracted_files:
 		if ex_file.lower().endswith(('.zip', '7z', 'rar')):
