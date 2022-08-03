@@ -70,55 +70,19 @@ def concat_pdfs(master, wingman):
 
 
 def print_file(filepath, mode, currentprinter):
-	print(mode)
 	doc = PDFDoc(filepath)
 	doc.InitSecurityHandler()
-
 	printerMode = PrinterMode()
-	# printerMode.SetAutoCenter(True)
+	printerMode.SetAutoCenter(True)
 	printerMode.SetAutoRotate(True)
-	printerMode.SetPaperSize(PrinterMode.e_a4)
-	printerMode.SetOutputPageBorder(True)
+	printerMode.SetScaleType(PrinterMode.e_ScaleType_ReduceToOutputPage)
+	printerMode.SetNUp(1, 1)
 	if mode == 2:
-		printerMode.SetOrientation(PrinterMode.e_Orientation_Landscape)
 		printerMode.SetNUp(1, 2)
 	if mode == 4:
 		printerMode.SetNUp(2, 2, PrinterMode.e_PageOrder_LeftToRightThenTopToBottom)
 	Print.StartPrintJob(doc, currentprinter, doc.GetFileName(), "", None, printerMode, None)
 	doc.Close()
-
-
-# def print_file(filepath, exe_path, currentprinter):
-# 	"""
-# 	Помещение файла в очередь печати принтера. Документ передается в программу для печати, далее в цикле проверяется статус
-# 	этого документа до тех пор, пока он не пройдет все стадии постановки в очередь, затем программа завершается.
-# 	:param filepath: путь к файлу
-# 	:param exe_path: путь к программе PDFtoprinter
-# 	:param currentprinter: название принтера
-# 	"""
-# 	win32api.ShellExecute(0, 'open', exe_path, '/s ' + '"' + filepath + '"' + ' "' + currentprinter + '" ', '.', 0)
-# 	jobs = [0, 0, 0, 0, 0]
-# 	while sum(jobs) < 3:
-# 		time.sleep(0.01)
-# 		phandle = win32print.OpenPrinter(currentprinter)
-# 		print_jobs = win32print.EnumJobs(phandle, 0, -1, 1, )
-# 		docs_in_queue = {job['pDocument']:job['Status'] for job in print_jobs}
-# 		file_printing = os.path.basename(filepath)
-# 		if file_printing in docs_in_queue.keys() and jobs[0] != 1:  # "в списке" flag
-# 			jobs[0] = 1
-# 		if file_printing in docs_in_queue.keys() and jobs[1] != 1:  # "постановка в очередь" flag
-# 			if docs_in_queue[file_printing] == 8:
-# 				jobs[1] = 1
-# 		if file_printing in docs_in_queue.keys() and jobs[2] != 1:  # "в очереди" flag
-# 			if docs_in_queue[file_printing] == 0:
-# 				jobs[2] = 1
-# 		if file_printing in docs_in_queue.keys() and jobs[3] != 1:  # "печатается" flag
-# 			if docs_in_queue[file_printing] == 8208:
-# 				jobs[3] = 1
-# 		if file_printing not in docs_in_queue.keys() and jobs[0] == 1:  # "напечатан" flag
-# 			jobs[4] = 1
-# 		win32print.ClosePrinter(phandle)
-# 	subprocess.call("taskkill.exe /im pdftoprinter.exe /f", shell = True)
 
 
 def parse_names(names: str):

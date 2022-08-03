@@ -1,4 +1,5 @@
 import os.path
+import time
 from functools import partial
 from tkinter import *
 from tkinter import messagebox
@@ -123,10 +124,12 @@ def print_dialog():
 	dialog.resizable(False, False)
 
 	def apply_print(e):
+		print_button.unbind("<Button-1>")
+		print_button.config(relief = SUNKEN)
+		print_button.update()
 		for i, j in printcbVariables.items():
 			if j.get():
-				print_file(i, rbVariables[i].get(),
-						   current_config.default_printer)  # print_file(multiplePagesPerSheet(i, rbVariables[i].get()), PDF_PRINT_FILE,  # 		   current_config.default_printer)
+				print_file(i, rbVariables[i].get(), current_config.default_printer)
 		if current_config.save_stat == 'yes' and statsaver.get():
 			print('saving to stats')
 			stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
@@ -137,6 +140,18 @@ def print_dialog():
 				'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
 			stat_writer.add_and_save_stats()
 		info_show_printed()
+		print_button.config(relief = RAISED)
+		print_button.bind("<Button-1>", apply_print)
+
+	def open_folder(e):
+		open_folder_b.unbind("<Button-1>")
+		open_folder_b.config(relief = SUNKEN)
+		open_folder_b.update()
+		subprocess.Popen(f'explorer {os.path.dirname(filepathsForPrint[0])}')
+		time.sleep(0.1)
+		open_folder_b.config(relief = RAISED)
+		open_folder_b.update()
+		open_folder_b.bind("<Button-1>", open_folder)
 
 	def update_num_pages():
 		full_len_pages = sum([sorterClass.num_pages[filepathsForPrint[i]][0] for i in range(len(filepathsForPrint)) if
@@ -162,7 +177,7 @@ def print_dialog():
 
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
-									  width = 731)
+									  width = 600)
 	container.pack()
 	filepathsForPrint = sorterClass.files_for_print
 	filenamesForPrint = [os.path.basename(i) if len(os.path.basename(i)) < 58 else os.path.basename(i)[:55] + '...' for
@@ -195,10 +210,6 @@ def print_dialog():
 		rb4 = Radiobutton(container, variable = rbVariables[filepathsForPrint[i]], value = 4,
 						  command = update_num_pages)
 		rb4.grid(column = 5, row = i + 1, sticky = W)
-		prvbtn = Label(container, text = 'Предпросмотр', padx = 2)
-		prvbtn.grid(column = 6, row = i + 1)
-		prvbtn.bind('<Button-1>',
-					lambda event, a = filepathsForPrint[i]:os.startfile(multiplePagesPerSheet(a, rbVariables[a].get())))
 	bottom_actions = Frame(dialog)
 	bottom_actions.pack()
 	len_pages = StringVar()
@@ -214,11 +225,10 @@ def print_dialog():
 		save_to_stat_chkbtn = Checkbutton(bottom_actions, variable = statsaver, text = 'Добавить в статистику',
 										  command = lambda:print(statsaver.get()))
 		save_to_stat_chkbtn.grid(column = 0, row = 0, sticky = S, padx = 5, pady = 2)
-	open_folder_b = Label(bottom_actions, text = " Открыть папку ", borderwidth = 2, relief = "groove")
+	open_folder_b = Label(bottom_actions, text = " Открыть папку ", borderwidth = 2, relief = RAISED)
 	open_folder_b.grid(column = 1, row = 0, sticky = S, padx = 5, pady = 2)
-	open_folder_b.bind("<Button-1>",
-					   lambda event, a = os.path.dirname(filepathsForPrint[0]):subprocess.Popen(f'explorer {a}'))
-	print_button = Label(bottom_actions, text = " Печать ", borderwidth = 2, relief = "groove")
+	open_folder_b.bind("<Button-1>", open_folder)
+	print_button = Label(bottom_actions, text = " Печать ", borderwidth = 2, relief = RAISED)
 	print_button.grid(column = 2, row = 0, sticky = S, padx = 5, pady = 2)
 	print_button.bind("<Button-1>", apply_print)
 	sum_pages = Label(bottom_actions, textvariable = len_pages)
@@ -227,10 +237,6 @@ def print_dialog():
 
 def info_show_printed():
 	messagebox.showinfo("Готово", "Документы отправлены в очередь принтера.")
-
-
-def warning_not_zip():
-	messagebox.showwarning("Варнинг", "Загружен не Zip архив.")
 
 
 def info_show_credits(e):

@@ -37,8 +37,7 @@ class Message_handler:
 				filepaths, filenames = unpack_archieved_files(outpath)
 				for fp, fn in zip(filepaths, filenames):
 					list_files.append([fp, fn])
-			if ext in self.allowed_ext:
-				list_files.append([outpath, filename])
+			list_files.append([outpath, filename])
 		return list_files
 
 	def convert_attachments(self, list_fp_fn):
@@ -83,16 +82,34 @@ class Message_handler:
 		dialog.resizable(False, False)
 
 		def update_num_pages():
-			string_pages_papers = f"Всего для печати страниц: , листов: "
-			dialog.title(f'Документов на печать ')
+			total_pages = 0
+			total_papers = 0
+			docs_for_print = 0
+			for msg in self.handle_keys:
+				if printcbVariables[msg].get():
+					docs_for_print += 1
+					total_pages += 1
+					total_papers += 1
+				for att in self.handled_attachments[msg]:
+					if printcbVariables[att[0]].get():
+						docs_for_print += 1
+						total_pages += att[2]
+						total_papers += att[3]
+			string_pages_papers = f"Всего для печати страниц: {total_pages}, листов: {total_papers}"
+			len_pages.set(string_pages_papers)
+			dialog.title(f'Документов на печать {docs_for_print}')
 
-		if sum([len(item) for item in self.handled_attachments.items()]) + len(self.handled_messages.keys()) > 20:
-			height = 550
-		else:
-			height = (sum([len(item) for item in self.handled_attachments.items()]) + len(
-				self.handled_messages.keys()) + 1) * 25
+		MAXHEIGHT = 650
+		height = 1
+		for msg in self.handle_keys:
+			height += 1
+			for att in self.handled_attachments[msg]:
+				height += 1
+		height = height * 25
+		if height > MAXHEIGHT:
+			height = MAXHEIGHT
 
-		container = VerticalScrolledFrame(dialog, height = height, width = 731)
+		container = VerticalScrolledFrame(dialog, height = height, width = 600)
 		container.pack()
 		rbVariables = {}
 		printcbVariables = {}
@@ -102,7 +119,8 @@ class Message_handler:
 		Label(container, text = '2').grid(column = 4, row = 0)
 		Label(container, text = '4').grid(column = 5, row = 0)
 		currentrow = 1
-		for n, filepath in enumerate(self.handle_keys):
+
+		for filepath in self.handle_keys:
 			subject = self.handled_messages[filepath].subject if self.handled_messages[
 																	 filepath].subject != '' else 'Пустая тема'
 			subject = subject if len(subject) < 48 else subject[:45] + "..."
@@ -118,13 +136,17 @@ class Message_handler:
 				current_key = att[0]
 				current_name = att[1]
 				current_pages = att[2]
-				current_name = current_name if len(current_name) < 48 else current_name[:45] + "..."
+				current_papers = att[3]
+				current_printable = att[4]
+				current_name = current_name if len(current_name) < 58 else current_name[:55] + "..."
 				padx = 10
 				printcbVariables[current_key] = BooleanVar()
-				printcbVariables[current_key].set(1)
+				printcbVariables[current_key].set(current_printable)
 				prntchb = Checkbutton(container, variable = printcbVariables[current_key], command = update_num_pages)
 				prntchb.var = printcbVariables[current_key]
-				prntchb.grid(column = 0, row = currentrow, sticky = W)
+				prntchb.grid(column = 0, row = currentrow, sticky = W, padx = padx / 2)
+				if not current_printable:
+					prntchb.config(state = DISABLED)
 				lb = Label(container, text = current_name, font = 'TkFixedFont')
 				lb.grid(column = 1, row = currentrow, sticky = W, padx = padx)
 				lb.bind('<Double-Button-1>', lambda event, a = current_key:os.startfile(a))
@@ -133,13 +155,21 @@ class Message_handler:
 				rbVariables[current_key] = IntVar()
 				rbVariables[current_key].set(1)
 				rb1 = Radiobutton(container, variable = rbVariables[current_key], value = 1, command = update_num_pages)
+				rb1.var = rbVariables[current_key]
 				rb1.grid(column = 3, row = currentrow, sticky = W)
 				rb2 = Radiobutton(container, variable = rbVariables[current_key], value = 2, command = update_num_pages)
+				rb2.var = rbVariables[current_key]
 				rb2.grid(column = 4, row = currentrow, sticky = W)
 				rb4 = Radiobutton(container, variable = rbVariables[current_key], value = 4, command = update_num_pages)
+				rb4.var = rbVariables[current_key]
 				rb4.grid(column = 5, row = currentrow, sticky = W)
-				prvbtn = Label(container, text = 'Предпросмотр', padx = 2)
-				prvbtn.grid(column = 6, row = currentrow)
-				prvbtn.bind('<Button-1>',
-							lambda event, a = current_key:os.startfile(multiplePagesPerSheet(a, rbVariables[a].get())))
 				currentrow += 1
+		bottom_actions = Frame(dialog)
+		bottom_actions.pack()
+		len_pages = StringVar()
+		print_button = Label(bottom_actions, text = " Печать ", borderwidth = 2, relief = "groove")
+		print_button.grid(column = 2, row = 0, sticky = S, padx = 5, pady = 2)
+		print_button.bind("<Button-1>", update_num_pages)
+		sum_pages = Label(bottom_actions, textvariable = len_pages)
+		sum_pages.grid(column = 3, row = 0, sticky = S, padx = 5, pady = 2)
+		update_num_pages()
