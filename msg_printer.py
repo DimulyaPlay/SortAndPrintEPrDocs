@@ -95,7 +95,11 @@ class Message_handler:
 					total_pages += 1
 					total_papers += 1
 				for att in self.handled_attachments[msg]:
-					if printcbVariables[att[0]].get():
+					try:
+						is_checked = printcbVariables[att[0]].get()
+					except:
+						is_checked = 0
+					if is_checked:
 						docs_for_print += 1
 						total_pages += att[2]
 						total_papers += att[3]
@@ -126,6 +130,7 @@ class Message_handler:
 			else:
 				for chbtn in printcbVariables.values():
 					chbtn.set(0)
+			update_num_pages()
 
 		MAXHEIGHT = 650
 		height = 1
@@ -137,7 +142,7 @@ class Message_handler:
 		if height > MAXHEIGHT:
 			height = MAXHEIGHT
 
-		container = VerticalScrolledFrame(dialog, height = height, width = 600)
+		container = VerticalScrolledFrame(dialog, height = height, width = 620)
 		container.pack()
 		rbVariables = {}
 		printcbVariables = {}
@@ -173,13 +178,15 @@ class Message_handler:
 				current_printable = att[4]
 				current_name = current_name if len(current_name) < 58 else current_name[:55] + "..."
 				padx = 10
-				printcbVariables[current_key] = BooleanVar()
-				printcbVariables[current_key].set(current_printable)
-				prntchb = Checkbutton(container, variable = printcbVariables[current_key], command = update_num_pages)
-				prntchb.var = printcbVariables[current_key]
+				if current_printable:
+					printcbVariables[current_key] = BooleanVar()
+					printcbVariables[current_key].set(1)
+					prntchb = Checkbutton(container, variable = printcbVariables[current_key],
+										  command = update_num_pages)
+					prntchb.var = printcbVariables[current_key]
+				else:
+					prntchb = Checkbutton(container, state = DISABLED)
 				prntchb.grid(column = 0, row = currentrow, sticky = W, padx = padx / 2)
-				if not current_printable:
-					prntchb.config(state = DISABLED)
 				lb = Label(container, text = current_name, font = 'TkFixedFont')
 				lb.grid(column = 1, row = currentrow, sticky = W, padx = padx)
 				lb.bind('<Double-Button-1>', lambda event, a = current_key:os.startfile(a))

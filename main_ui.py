@@ -12,7 +12,7 @@ from sorter_class import *
 from stats_module import stat_loader
 
 # ver = '3.4.4'
-ver = '1.0.5_TRON'
+ver = '1.0.6_TRON'
 curdate = '2022/08/04'
 
 if getattr(sys, 'frozen', False):
@@ -182,6 +182,7 @@ def print_dialog():
 		else:
 			for chbtn in printcbVariables.values():
 				chbtn.set(0)
+		update_num_pages()
 
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
