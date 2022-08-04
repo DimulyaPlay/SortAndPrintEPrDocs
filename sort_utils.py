@@ -1,7 +1,6 @@
 import glob
 import tempfile
 from difflib import SequenceMatcher
-
 import patoolib
 from PDFNetPython3 import *
 
@@ -78,7 +77,8 @@ def print_file(filepath, mode, currentprinter):
 	printerMode.SetScaleType(PrinterMode.e_ScaleType_ReduceToOutputPage)
 	printerMode.SetNUp(1, 1)
 	if mode == 2:
-		printerMode.SetNUp(1, 2)
+		printerMode.SetNUp(1, 2, PrinterMode.e_PageOrder_BottomToTopThenLeftToRight)
+		Convert.ToTiff(doc, filepath + '.tiff')
 	if mode == 4:
 		printerMode.SetNUp(2, 2, PrinterMode.e_PageOrder_LeftToRightThenTopToBottom)
 	Print.StartPrintJob(doc, currentprinter, doc.GetFileName(), "", None, printerMode, None)

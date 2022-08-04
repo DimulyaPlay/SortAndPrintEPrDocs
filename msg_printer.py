@@ -1,8 +1,6 @@
 import shutil
 from tkinter import *
-
 import win32com.client
-
 from scrollable_frame import VerticalScrolledFrame
 from sort_utils import *
 

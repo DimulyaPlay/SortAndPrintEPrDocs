@@ -3,10 +3,8 @@ import time
 from functools import partial
 from tkinter import *
 from tkinter import messagebox
-
 import win32print
 from tkinterdnd2 import *
-
 from config_loader import config_file
 from msg_printer import Message_handler
 from scrollable_frame import VerticalScrolledFrame
