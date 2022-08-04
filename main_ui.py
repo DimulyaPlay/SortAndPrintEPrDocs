@@ -11,8 +11,9 @@ from scrollable_frame import VerticalScrolledFrame
 from sorter_class import *
 from stats_module import stat_loader
 
-ver = '3.4.4'
-curdate = '2022/08/01'
+# ver = '3.4.4'
+ver = '1.0.5_TRON'
+curdate = '2022/08/04'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -52,7 +53,7 @@ def main_drop(event):
 	if path[-4:] != '.zip':
 		msgnames = parse_names(event.data)
 		msg_handler.handle_messages(msgnames)
-		msg_handler.print_dialog_msg(root)
+		msg_handler.print_dialog_msg(root, current_config)
 	else:
 		sorterClass.agregate_file(path)
 		if current_config.print_directly == "yes":
@@ -127,6 +128,7 @@ def print_dialog():
 		print_button.update()
 		for i, j in printcbVariables.items():
 			if j.get():
+				j.set(0)
 				print_file(i, rbVariables[i].get(), current_config.default_printer)
 		if current_config.save_stat == 'yes' and statsaver.get():
 			print('saving to stats')
@@ -173,6 +175,14 @@ def print_dialog():
 		dialog.title(f'Документов на печать {num_docs_for_print.get()}')
 		len_pages.set(string_pages_papers)
 
+	def check_all_chbtns():
+		if prntchballvar.get():
+			for chbtn in printcbVariables.values():
+				chbtn.set(1)
+		else:
+			for chbtn in printcbVariables.values():
+				chbtn.set(0)
+
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
 									  width = 600)
@@ -182,6 +192,10 @@ def print_dialog():
 						 i in filepathsForPrint]
 	printcbVariables = {}
 	rbVariables = {}
+	prntchballvar = BooleanVar()
+	prntchballvar.set(1)
+	prntchball = Checkbutton(container, variable = prntchballvar, command = check_all_chbtns)
+	prntchball.grid(column = 0, row = 0)
 	Label(container, text = 'Название документа').grid(column = 1, row = 0)
 	Label(container, text = 'Страниц').grid(column = 2, row = 0)
 	Label(container, text = '1').grid(column = 3, row = 0)
