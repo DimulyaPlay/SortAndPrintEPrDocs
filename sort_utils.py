@@ -3,6 +3,11 @@ import tempfile
 from difflib import SequenceMatcher
 import patoolib
 from PDFNetPython3 import *
+from PyPDF2 import PdfFileReader, PdfFileWriter
+import PyPDF2
+
+a4orig = [612.1, 842.0]  # оригинальный формат А4
+a4small = [i * 0.99 for i in a4orig]  # размер для масштабирования под область печати
 
 
 def initPDFTron(lc):
@@ -68,7 +73,7 @@ def concat_pdfs(master, wingman):
 	return master, is_paper_eco
 
 
-def print_file(filepath, mode, currentprinter):
+def print_file(filepath, mode, currentprinter, convert = False):
 	doc = PDFDoc(filepath)
 	doc.InitSecurityHandler()
 	printerMode = PrinterMode()
@@ -76,9 +81,13 @@ def print_file(filepath, mode, currentprinter):
 	printerMode.SetAutoRotate(True)
 	printerMode.SetScaleType(PrinterMode.e_ScaleType_ReduceToOutputPage)
 	printerMode.SetNUp(1, 1)
-	if mode == 2:
-		printerMode.SetNUp(1, 2, PrinterMode.e_PageOrder_BottomToTopThenLeftToRight)
+	if convert:
 		Convert.ToTiff(doc, filepath + '.tiff')
+	if mode == 2:
+		doc.Close()
+		doc = PDFDoc(twoUP(filepath))
+		if not convert:
+			Convert.ToTiff(doc, filepath + '.tiff')
 	if mode == 4:
 		printerMode.SetNUp(2, 2, PrinterMode.e_PageOrder_LeftToRightThenTopToBottom)
 	Print.StartPrintJob(doc, currentprinter, doc.GetFileName(), "", None, printerMode, None)
@@ -116,3 +125,62 @@ def unpack_archieved_files(path):
 			total_files.extend(files)
 	total_names = [os.path.basename(i) for i in total_files]
 	return total_files, total_names
+
+
+def fitPdfInA4(pdfpath):
+	"""
+	Автоматический поворот в вертикальную ориентацию и вписывание документа в А4
+	:param pdfpath: путь к файлу
+	:return: outpath - путь к сформированному temp-файлу
+	"""
+	pdf = PdfFileReader(pdfpath)
+	new_pdf = PdfFileWriter()
+	for page in pdf.pages:
+		page_width = page.mediaBox.getWidth()
+		page_height = page.mediaBox.getHeight()
+		if page_width > page_height:
+			page.rotateClockwise(270)
+		page_width = page.mediaBox.getWidth()
+		page_height = page.mediaBox.getHeight()
+		if page_width > a4small[0] or page_height > a4small[1]:
+			hor_koef = a4small[0] / float(page_width)
+			ver_koef = a4small[1] / float(page_height)
+			min_koef = min([hor_koef, ver_koef])
+			page.scaleBy(min_koef)
+			oldpage = page
+			page = PyPDF2.pdf.PageObject.createBlankPage(width = a4orig[0], height = a4orig[1])
+			padx = oldpage.mediaBox.getWidth() / 2
+			pady = oldpage.mediaBox.getHeight() / 2
+			page.mergeTranslatedPage(oldpage, 306 - padx, 421 - pady)
+		new_pdf.addPage(page)
+	fd, outpath = tempfile.mkstemp('.pdf')
+	os.close(fd)
+	with open(outpath, mode = 'wb') as export:
+		new_pdf.write(export)
+	return outpath
+
+
+def twoUP(filepath):
+	"""
+	Реализация функции печати n страниц на 1 листе бумаги.
+	:param filepath: Путь к файлу
+	:return: путь к сформированному temp-файлу
+	"""
+	merged_file = PdfFileWriter()
+	rotated_pdf = fitPdfInA4(filepath)
+	orig_file = PdfFileReader(rotated_pdf, strict = False)
+	n_pages = len(orig_file.pages)
+	for i in range(0, n_pages, 2):
+		big_page = PyPDF2.pdf.PageObject.createBlankPage(width = 595.2, height = 842.88)
+		big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i], rotation = 90, scale = 0.7, tx = 585.2, ty = 10)
+		try:
+			big_page.mergeRotatedScaledTranslatedPage(orig_file.pages[i + 1], rotation = 90, scale = 0.7, tx = 585.2,
+													  ty = 420)
+		except:
+			pass
+		merged_file.addPage(big_page)
+	fd, outpath = tempfile.mkstemp('.pdf')
+	os.close(fd)
+	with open(outpath, 'wb') as out:
+		merged_file.write(out)
+	return outpath

@@ -12,8 +12,8 @@ from sorter_class import *
 from stats_module import stat_loader
 
 # ver = '3.4.4'
-ver = '1.0.6_TRON'
-curdate = '2022/08/04'
+ver = '1.0.7_TRON'
+curdate = '2022/08/05'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -126,10 +126,12 @@ def print_dialog():
 		print_button.unbind("<Button-1>")
 		print_button.config(relief = SUNKEN)
 		print_button.update()
-		for i, j in printcbVariables.items():
-			if j.get():
-				j.set(0)
-				print_file(i, rbVariables[i].get(), current_config.default_printer)
+		for fp, prntcbvar in printcbVariables.items():
+			if prntcbvar.get():
+				print_file(fp, rbVariables[fp].get(), current_config.default_printer, convertVars[fp].get())
+				prntcbvar.set(0)
+				lb1[fp].config(background = 'green1')
+				lb1[fp].update()
 		if current_config.save_stat == 'yes' and statsaver.get():
 			print('saving to stats')
 			stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
@@ -140,6 +142,7 @@ def print_dialog():
 				'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
 			stat_writer.add_and_save_stats()
 		info_show_printed()
+		update_num_pages()
 		print_button.config(relief = RAISED)
 		print_button.bind("<Button-1>", apply_print)
 
@@ -154,26 +157,24 @@ def print_dialog():
 		open_folder_b.bind("<Button-1>", open_folder)
 
 	def update_num_pages():
-		full_len_pages = sum([sorterClass.num_pages[filepathsForPrint[i]][0] for i in range(len(filepathsForPrint)) if
-							  printcbVariables[filepathsForPrint[i]].get()])
-		eco_dupl_len_for_print = sum(
-			[int(sorterClass.num_pages[filepathsForPrint[i]][0] / 2 / (rbVariables[filepathsForPrint[i]].get()) + 0.9)
-			 for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
-		full_dupl_len_for_print = sum(
-			[int(sorterClass.num_pages[filepathsForPrint[i]][0] / 2 + 0.9) for i in range(len(filepathsForPrint)) if
-			 printcbVariables[filepathsForPrint[i]].get()])
-		eco_protocols = sum(
-			[sorterClass.num_protocols_eco[filepathsForPrint[i]] for i in range(len(filepathsForPrint)) if
-			 printcbVariables[filepathsForPrint[i]].get()])
-		string_num_docs = sum(
-			[1 for i in range(len(filepathsForPrint)) if printcbVariables[filepathsForPrint[i]].get()])
-		string_pages_papers = f"Всего для печати страниц: {full_len_pages}, листов: {eco_dupl_len_for_print}"
-		num_docs_for_print.set(string_num_docs)
+		full_len_pages = 0
+		eco_dupl_len_for_print = 0
+		full_dupl_len_for_print = 0
+		eco_protocols = 0
+		string_num_docs = 0
+		for fp in filepathsForPrint:
+			if printcbVariables[fp].get():
+				full_len_pages += sorterClass.num_pages[fp][0]
+				eco_dupl_len_for_print += int(sorterClass.num_pages[fp][0] / 2 / (rbVariables[fp].get()) + 0.9)
+				full_dupl_len_for_print += int(sorterClass.num_pages[fp][0] / 2 + 0.9)
+				eco_protocols += sorterClass.num_protocols_eco[fp]
+				string_num_docs += 1
 		eco_dupl_len_for_print_var.set(eco_dupl_len_for_print)
 		full_dupl_len_for_print_var.set(full_dupl_len_for_print)
 		eco_protocols_var.set(eco_protocols)
+		num_docs_for_print.set(string_num_docs)
 		dialog.title(f'Документов на печать {num_docs_for_print.get()}')
-		len_pages.set(string_pages_papers)
+		len_pages.set(f"Всего для печати страниц: {full_len_pages}, листов: {eco_dupl_len_for_print}")
 
 	def check_all_chbtns():
 		if prntchballvar.get():
@@ -186,13 +187,13 @@ def print_dialog():
 
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
-									  width = 600)
+									  width = 610)
 	container.pack()
 	filepathsForPrint = sorterClass.files_for_print
-	filenamesForPrint = [os.path.basename(i) if len(os.path.basename(i)) < 58 else os.path.basename(i)[:55] + '...' for
-						 i in filepathsForPrint]
 	printcbVariables = {}
 	rbVariables = {}
+	lb1 = {}
+	convertVars = {}
 	prntchballvar = BooleanVar()
 	prntchballvar.set(1)
 	prntchball = Checkbutton(container, variable = prntchballvar, command = check_all_chbtns)
@@ -202,27 +203,32 @@ def print_dialog():
 	Label(container, text = '1').grid(column = 3, row = 0)
 	Label(container, text = '2').grid(column = 4, row = 0)
 	Label(container, text = '4').grid(column = 5, row = 0)
-	for i in range(len(filepathsForPrint)):
-		printcbVariables[filepathsForPrint[i]] = BooleanVar()
-		printcbVariables[filepathsForPrint[i]].set(1)
-		prntchb = Checkbutton(container, variable = printcbVariables[filepathsForPrint[i]], command = update_num_pages)
-		prntchb.grid(column = 0, row = i + 1, sticky = W)
-		lb1 = Label(container, text = filenamesForPrint[i], font = 'TkFixedFont')
-		lb1.grid(column = 1, row = i + 1, sticky = W)
-		lb1.bind('<Double-Button-1>', lambda event, a = filepathsForPrint[i]:os.startfile(a))
-		lb2 = Label(container, text = str(sorterClass.num_pages[filepathsForPrint[i]][0]), padx = 2)
-		lb2.grid(column = 2, row = i + 1)
-		rbVariables[filepathsForPrint[i]] = IntVar()
-		rbVariables[filepathsForPrint[i]].set(1)
-		rb1 = Radiobutton(container, variable = rbVariables[filepathsForPrint[i]], value = 1,
-						  command = update_num_pages)
-		rb1.grid(column = 3, row = i + 1, sticky = W)
-		rb2 = Radiobutton(container, variable = rbVariables[filepathsForPrint[i]], value = 2,
-						  command = update_num_pages)
-		rb2.grid(column = 4, row = i + 1, sticky = W)
-		rb4 = Radiobutton(container, variable = rbVariables[filepathsForPrint[i]], value = 4,
-						  command = update_num_pages)
-		rb4.grid(column = 5, row = i + 1, sticky = W)
+	current_row = 1
+	for fp in filepathsForPrint:
+		fn = os.path.basename(fp)
+		fn = fn if len(fn) < 58 else fn[:55] + '...'
+		printcbVariables[fp] = BooleanVar()
+		printcbVariables[fp].set(1)
+		prntchb = Checkbutton(container, variable = printcbVariables[fp], command = update_num_pages)
+		prntchb.grid(column = 0, row = current_row, sticky = W)
+		lb1[fp] = Label(container, text = fn, font = 'TkFixedFont')
+		lb1[fp].grid(column = 1, row = current_row, sticky = W)
+		lb1[fp].bind('<Double-Button-1>', lambda event, a = fp:os.startfile(a))
+		lb2 = Label(container, text = str(sorterClass.num_pages[fp][0]), padx = 2)
+		lb2.grid(column = 2, row = current_row)
+		rbVariables[fp] = IntVar()
+		rbVariables[fp].set(1)
+		rb1 = Radiobutton(container, variable = rbVariables[fp], value = 1, command = update_num_pages)
+		rb1.grid(column = 3, row = current_row, sticky = W)
+		rb2 = Radiobutton(container, variable = rbVariables[fp], value = 2, command = update_num_pages)
+		rb2.grid(column = 4, row = current_row, sticky = W)
+		rb4 = Radiobutton(container, variable = rbVariables[fp], value = 4, command = update_num_pages)
+		rb4.grid(column = 5, row = current_row, sticky = W)
+		convertVars[fp] = BooleanVar()
+		convertVars[fp].set(0)
+		convertchb = Checkbutton(container, variable = convertVars[fp], command = update_num_pages)
+		convertchb.grid(column = 6, row = current_row, sticky = W)
+		current_row += 1
 	bottom_actions = Frame(dialog)
 	bottom_actions.pack()
 	len_pages = StringVar()
@@ -291,7 +297,7 @@ settings_button.bind("<Button-1>", show_settings)
 dropzone = Label(root, text = '+', relief = "ridge", font = ('Arial', 20))
 dropzone.pack(fill = X)
 dropzone.drop_target_register(DND_FILES)
-dropzone.dnd_bind('<<DropEnter>>', partial(color_config_enter, dropzone, "green"))
+dropzone.dnd_bind('<<DropEnter>>', partial(color_config_enter, dropzone, "green1"))
 dropzone.dnd_bind('<<DropLeave>>', partial(color_config_leave, dropzone, "black"))
 dropzone.dnd_bind('<<Drop>>', main_drop)
 

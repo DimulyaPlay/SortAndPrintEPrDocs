@@ -113,13 +113,19 @@ class Message_handler:
 			print_button.update()
 			for msg in self.handle_keys:
 				if printcbVariables[msg].get():
-					printcbVariables[msg].set(0)
 					self.handled_messages[msg].PrintOut()
+					printcbVariables[msg].set(0)
+					lb1[msg].config(background = 'green1')
+					lb1[msg].update()
 				for att in self.handled_attachments[msg]:
 					if printcbVariables[att[0]].get():
+						print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
+								   convertcbVars[att[0]].get())
 						printcbVariables[att[0]].set(0)
-						print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer)
+						lb1[att[0]].config(background = 'green1')
+						lb1[att[0]].update()
 			info_show_printed()
+			update_num_pages()
 			print_button.config(relief = RAISED)
 			print_button.bind("<Button-1>", apply_print)
 
@@ -142,10 +148,12 @@ class Message_handler:
 		if height > MAXHEIGHT:
 			height = MAXHEIGHT
 
-		container = VerticalScrolledFrame(dialog, height = height, width = 620)
+		container = VerticalScrolledFrame(dialog, height = height, width = 630)
 		container.pack()
 		rbVariables = {}
+		lb1 = {}
 		printcbVariables = {}
+		convertcbVars = {}
 		prntchballvar = BooleanVar()
 		prntchballvar.set(1)
 		prntchball = Checkbutton(container, variable = prntchballvar, command = check_all_chbtns)
@@ -166,9 +174,9 @@ class Message_handler:
 			prntchb = Checkbutton(container, variable = printcbVariables[filepath], command = update_num_pages)
 			prntchb.var = printcbVariables[filepath]
 			prntchb.grid(column = 0, row = currentrow, sticky = W)
-			msglb = Label(container, text = subject, font = 'TkFixedFont 9 bold')
-			msglb.grid(column = 1, row = currentrow, sticky = W)
-			msglb.bind('<Double-Button-1>', lambda event, a = self.handled_messages[filepath]:view_body(a))
+			lb1[filepath] = Label(container, text = subject, font = 'TkFixedFont 9 bold')
+			lb1[filepath].grid(column = 1, row = currentrow, sticky = W)
+			lb1[filepath].bind('<Double-Button-1>', lambda event, a = self.handled_messages[filepath]:view_body(a))
 			currentrow += 1
 			for j, att in enumerate(self.handled_attachments[filepath]):
 				current_key = att[0]
@@ -184,14 +192,21 @@ class Message_handler:
 					prntchb = Checkbutton(container, variable = printcbVariables[current_key],
 										  command = update_num_pages)
 					prntchb.var = printcbVariables[current_key]
+					convertcbVars[current_key] = BooleanVar()
+					convertcbVars[current_key].set(0)
+					convertcb = Checkbutton(container, variable = convertcbVars[current_key],
+											command = update_num_pages)
+					convertcb.var = convertcbVars[current_key]
+
 				else:
 					prntchb = Checkbutton(container, state = DISABLED)
 				prntchb.grid(column = 0, row = currentrow, sticky = W, padx = padx / 2)
-				lb = Label(container, text = current_name, font = 'TkFixedFont')
-				lb.grid(column = 1, row = currentrow, sticky = W, padx = padx)
-				lb.bind('<Double-Button-1>', lambda event, a = current_key:os.startfile(a))
-				lb1 = Label(container, text = current_pages)
-				lb1.grid(column = 2, row = currentrow, sticky = W, padx = padx)
+				convertcb.grid(column = 6, row = currentrow, sticky = W)
+				lb1[current_key] = Label(container, text = current_name, font = 'TkFixedFont')
+				lb1[current_key].grid(column = 1, row = currentrow, sticky = W, padx = padx)
+				lb1[current_key].bind('<Double-Button-1>', lambda event, a = current_key:os.startfile(a))
+				lb2 = Label(container, text = current_pages)
+				lb2.grid(column = 2, row = currentrow, sticky = W, padx = padx)
 				rbVariables[current_key] = IntVar()
 				rbVariables[current_key].set(1)
 				rb1 = Radiobutton(container, variable = rbVariables[current_key], value = 1, command = update_num_pages)
