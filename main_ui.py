@@ -33,8 +33,11 @@ config_paths = [config_path, PDF_PRINT_FILE]
 
 current_config = config_file(config_paths)
 
-with open(license_path, 'r') as lic:
-	LICENSE_KEY = lic.readline()
+if os.path.exists(license_path):
+	with open(license_path, 'r') as lic:
+		LICENSE_KEY = lic.readline()
+else:
+	LICENSE_KEY = 'demo:1651643691881:7bbe6e960300000000f44976dbcbd47a0cb10a4317da3b8120ca6a1ff8'
 initPDFTron(LICENSE_KEY)
 
 if current_config.save_stat == 'yes':

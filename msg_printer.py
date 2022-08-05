@@ -3,7 +3,6 @@ from tkinter import *
 import win32com.client
 from scrollable_frame import VerticalScrolledFrame
 from sort_utils import *
-from tkinterhtml import HtmlFrame
 
 
 class Message_handler:
@@ -62,10 +61,12 @@ class Message_handler:
 		self.handle_keys = []
 		self.handled_messages = {}
 		self.handled_attachments = {}
+		self.orig_messages = {}
 		for i in msgs:
 			fd, outpath = tempfile.mkstemp('.msg')
 			os.close(fd)
 			shutil.copy2(i, outpath)
+			self.orig_messages[outpath] = i
 			msg = self.outlook.OpenSharedItem(fr'{outpath}')
 			attachment_files = self.get_files_from_msg(msg)
 			attachment_files = self.convert_attachments(attachment_files)
@@ -78,12 +79,6 @@ class Message_handler:
 		dialog.title(f'Файлов на печать ')
 		dialog.attributes('-topmost', True)
 		dialog.resizable(False, False)
-
-		def view_body(msg):
-			viewer = Toplevel(root)
-			frame = HtmlFrame(viewer, horizontal_scrollbar = "auto")
-			frame.set_content(msg.HTMLBody)
-			frame.pack()
 
 		def update_num_pages():
 			total_pages = 0
@@ -176,7 +171,7 @@ class Message_handler:
 			prntchb.grid(column = 0, row = currentrow, sticky = W)
 			lb1[filepath] = Label(container, text = subject, font = 'TkFixedFont 9 bold')
 			lb1[filepath].grid(column = 1, row = currentrow, sticky = W)
-			lb1[filepath].bind('<Double-Button-1>', lambda event, a = self.handled_messages[filepath]:view_body(a))
+			lb1[filepath].bind('<Double-Button-1>', lambda event, a = self.orig_messages[filepath]:os.startfile(a))
 			currentrow += 1
 			for j, att in enumerate(self.handled_attachments[filepath]):
 				current_key = att[0]
