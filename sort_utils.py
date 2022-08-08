@@ -47,11 +47,11 @@ def extracttext(path):
 def check_num_pages(path):
 	"""
 	Рассчет количества страниц и листов в документе
+
 	:param path: путь к файлу
 	:return: лист - страниц, листов
 	"""
 	doc = PDFDoc(path)
-	# doc.InitSecurityHandler()
 	n_pages = doc.GetPageCount()
 	pages = n_pages
 	papers = int(pages / 2 + 0.9)
@@ -60,11 +60,17 @@ def check_num_pages(path):
 
 
 def concat_pdfs(master, wingman):
+	"""
+	Конкатенация пдф файлов
+	:param master: путь к первому пдф
+
+	:param wingman: путь ко второму пдф
+
+	:return: str путь к обьединенному пдф, bool сохранен ли лист
+	"""
 	doc1 = PDFDoc(master)
 	doc2 = PDFDoc(wingman)
 	page_num = doc1.GetPageCount()
-	doc1.InitSecurityHandler()
-	doc2.InitSecurityHandler()
 	doc1.InsertPages(page_num + 1, doc2, 1, doc2.GetPageCount(), PDFDoc.e_none)
 	doc1.Save(master, SDFDoc.e_remove_unused)
 	doc1.Close()
@@ -74,8 +80,17 @@ def concat_pdfs(master, wingman):
 
 
 def print_file(filepath, mode, currentprinter, convert = False):
+	"""
+	Отправка документа в очередь печати с заданными параметрами
+
+	:param filepath: путь к файлу
+	:param mode: расположение страниц на листе
+
+	:param currentprinter: название принтера
+
+	:param convert: принудительная конвертация
+	"""
 	doc = PDFDoc(filepath)
-	doc.InitSecurityHandler()
 	printerMode = PrinterMode()
 	printerMode.SetAutoCenter(True)
 	printerMode.SetAutoRotate(True)
@@ -98,6 +113,7 @@ def parse_names(names: str):
 	"""
 	Разбор входящей строкии на имена мсг файлов
 	:param names: входящая строка
+
 	:return: лист из путей к файлам
 	"""
 	namesstart = 0
@@ -113,6 +129,13 @@ def parse_names(names: str):
 
 
 def unpack_archieved_files(path):
+	"""
+	Рекурсивная распаковка архивов
+
+	:param path: путь к архиву
+
+	:return: список путей к распакованным файлам, список названий файлов
+	"""
 	tempdir = tempfile.mkdtemp()
 	total_files = []
 	total_names = []

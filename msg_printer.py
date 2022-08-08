@@ -1,3 +1,4 @@
+import os
 import shutil
 from tkinter import *
 import win32com.client
@@ -16,9 +17,9 @@ class Message_handler:
 	@staticmethod
 	def get_file_from_attach(att):
 		"""
-		Коневртирует аттачмент, считает количество листов, позвращает аттачмент ссылку и статут возможности печати
+		Извлечение вложения, сохранение в temp
 		:param att: outlook attachment object
-		:return: путь к тепмфайлу, готовность к печати файла, количество страниц, количество листов
+		:return: путь к тепмфайлу, расшриение файла
 		"""
 		ext = '.' + att.FileName.rsplit('.', 1)[1].lower()
 		fd, outpath = tempfile.mkstemp(ext)
@@ -27,6 +28,11 @@ class Message_handler:
 		return outpath, ext
 
 	def get_files_from_msg(self, msg):
+		"""
+		Извлечение всех вложений из msg файла включая вложенные архивы
+		:param msg: outlook message object
+		:return: лист из путей ко всем извлеченным файлам
+		"""
 		list_files = []
 		for att in msg.attachments:
 			filename = att.FileName
@@ -34,12 +40,19 @@ class Message_handler:
 			if ext in self.allowed_ext_archives:
 				filepaths, filenames = unpack_archieved_files(outpath)
 				for fp, fn in zip(filepaths, filenames):
-					list_files.append([fp, fn])
+					if not os.path.isdir(fp):
+						list_files.append([fp, fn])
 			list_files.append([outpath, filename])
 		return list_files
 
 	def convert_attachments(self, list_fp_fn):
-		new_list_fp_fn_pgs_pps = []
+		"""
+		Ковертация разрешенных форматов в пдф
+
+		:param list_fp_fn: лист путей и имен файлов
+		:return: лист формата [[путь, название, кол-во страниц, кол-во листов, возможна ли печать],[...]]
+		"""
+		new_list_fp_fn_pgs_pps_isprnt = []
 		for fp, fn in list_fp_fn:
 			ext = '.' + fn.rsplit('.', 1)[1].lower()
 			if ext in self.allowed_ext:
@@ -49,15 +62,21 @@ class Message_handler:
 					pdfdoc.Save(fp + '.pdf', SDFDoc.e_compatibility)
 					pdfdoc.Close()
 					num_pgs, num_pps = check_num_pages(fp + '.pdf')
-					new_list_fp_fn_pgs_pps.append([fp + '.pdf', fn, num_pgs, num_pps, 1])
+					new_list_fp_fn_pgs_pps_isprnt.append([fp + '.pdf', fn, num_pgs, num_pps, 1])
 				if ext == '.pdf':
 					num_pgs, num_pps = check_num_pages(fp)
-					new_list_fp_fn_pgs_pps.append([fp, fn, num_pgs, num_pps, 1])
+					new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
 			else:
-				new_list_fp_fn_pgs_pps.append([fp, fn, '?', '?', 0])
-		return new_list_fp_fn_pgs_pps
+				new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, '?', '?', 0])
+		return new_list_fp_fn_pgs_pps_isprnt
 
 	def handle_messages(self, msgs):
+		"""
+		Объединенный метод, формирующий:
+		лист из ключей(пути к мсг файлам)
+		словари {ключ: msg}, {ключ:вложения},{ключ:путь к оригинальному msg}
+		:param msgs: list из путей к msg файлам
+		"""
 		self.handle_keys = []
 		self.handled_messages = {}
 		self.handled_attachments = {}
@@ -75,6 +94,11 @@ class Message_handler:
 			self.handled_attachments[outpath] = attachment_files
 
 	def print_dialog_msg(self, root, current_config):
+		"""
+		Функция окна печати
+		:param root: родительское окно
+		:param current_config: конфигурация
+		"""
 		dialog = Toplevel(root)
 		dialog.title(f'Файлов на печать ')
 		dialog.attributes('-topmost', True)
@@ -119,7 +143,6 @@ class Message_handler:
 						printcbVariables[att[0]].set(0)
 						lb1[att[0]].config(background = 'green1')
 						lb1[att[0]].update()
-			# info_show_printed()
 			update_num_pages()
 			print_button.config(relief = RAISED)
 			print_button.bind("<Button-1>", apply_print)
@@ -236,7 +259,3 @@ class Message_handler:
 		sum_pages = Label(bottom_actions, textvariable = len_pages)
 		sum_pages.grid(column = 3, row = 0, sticky = S, padx = 5, pady = 2)
 		update_num_pages()
-
-
-def info_show_printed():
-	messagebox.showinfo("Готово", "Документы отправлены в очередь принтера.")
