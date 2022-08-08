@@ -119,7 +119,7 @@ class Message_handler:
 						printcbVariables[att[0]].set(0)
 						lb1[att[0]].config(background = 'green1')
 						lb1[att[0]].update()
-			info_show_printed()
+			# info_show_printed()
 			update_num_pages()
 			print_button.config(relief = RAISED)
 			print_button.bind("<Button-1>", apply_print)
@@ -135,15 +135,28 @@ class Message_handler:
 
 		MAXHEIGHT = 650
 		height = 1
+		width = 0
 		for msg in self.handle_keys:
 			height += 1
+			if width < 68:
+				msg_len = len(self.handled_messages[msg].subject)
+				if width < msg_len:
+					width = msg_len
 			for att in self.handled_attachments[msg]:
+				if width < 68:
+					att_len = len(att[1])
+					if width < att_len:
+						width = att_len
 				height += 1
 		height = height * 25
+		if width < 26:
+			width = 26
+		if width > 68:
+			width = 68
+		width = (width * 7) + 225
 		if height > MAXHEIGHT:
 			height = MAXHEIGHT
-
-		container = VerticalScrolledFrame(dialog, height = height, width = 630)
+		container = VerticalScrolledFrame(dialog, height = height, width = width)
 		container.pack()
 		rbVariables = {}
 		lb1 = {}
@@ -169,7 +182,7 @@ class Message_handler:
 			prntchb = Checkbutton(container, variable = printcbVariables[filepath], command = update_num_pages)
 			prntchb.var = printcbVariables[filepath]
 			prntchb.grid(column = 0, row = currentrow, sticky = W)
-			lb1[filepath] = Label(container, text = subject, font = 'TkFixedFont 9 bold')
+			lb1[filepath] = Label(container, text = subject, font = 'TkFixedFont', fg = 'blue')
 			lb1[filepath].grid(column = 1, row = currentrow, sticky = W)
 			lb1[filepath].bind('<Double-Button-1>', lambda event, a = self.orig_messages[filepath]:os.startfile(a))
 			currentrow += 1

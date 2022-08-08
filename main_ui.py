@@ -12,8 +12,8 @@ from sorter_class import *
 from stats_module import stat_loader
 
 # ver = '3.4.4'
-ver = '1.0.7_TRON'
-curdate = '2022/08/05'
+ver = '1.0.8_TRON'
+curdate = '2022/08/08'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -144,7 +144,7 @@ def print_dialog():
 			stat_writer.statdict[
 				'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
 			stat_writer.add_and_save_stats()
-		info_show_printed()
+		# info_show_printed()
 		update_num_pages()
 		print_button.config(relief = RAISED)
 		print_button.bind("<Button-1>", apply_print)
@@ -190,7 +190,7 @@ def print_dialog():
 
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
-									  width = 610)
+									  width = 640)
 	container.pack()
 	filepathsForPrint = sorterClass.files_for_print
 	printcbVariables = {}
