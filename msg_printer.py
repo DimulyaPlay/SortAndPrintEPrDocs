@@ -57,12 +57,17 @@ class Message_handler:
 			ext = '.' + fn.rsplit('.', 1)[1].lower()
 			if ext in self.allowed_ext:
 				if ext != '.pdf':
-					pdfdoc = PDFDoc()
-					Convert.ToPdf(pdfdoc, fp)
-					pdfdoc.Save(fp + '.pdf', SDFDoc.e_compatibility)
-					pdfdoc.Close()
-					num_pgs, num_pps = check_num_pages(fp + '.pdf')
-					new_list_fp_fn_pgs_pps_isprnt.append([fp + '.pdf', fn, num_pgs, num_pps, 1])
+					if ext in self.allowed_ext_img:
+						pdfdoc = PDFDoc()
+						Convert.ToPdf(pdfdoc, fp)
+						pdfdoc.Save(fp + '.pdf', SDFDoc.e_compatibility)
+						pdfdoc.Close()
+						num_pgs, num_pps = check_num_pages(fp + '.pdf')
+						new_list_fp_fn_pgs_pps_isprnt.append([fp + '.pdf', fn, num_pgs, num_pps, 1])
+					if ext in self.allowed_ext_docs:
+						fp = word2pdf(fp)
+						num_pgs, num_pps = check_num_pages(fp)
+						new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
 				if ext == '.pdf':
 					num_pgs, num_pps = check_num_pages(fp)
 					new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
@@ -121,7 +126,7 @@ class Message_handler:
 					if is_checked:
 						docs_for_print += 1
 						total_pages += att[2]
-						total_papers += att[3]
+						total_papers += int(att[3] / rbVariables[att[0]].get() + 0.9)
 			string_pages_papers = f"Всего для печати страниц: {total_pages}, листов: {total_papers}"
 			len_pages.set(string_pages_papers)
 			dialog.title(f'Документов на печать {docs_for_print}')
@@ -137,6 +142,10 @@ class Message_handler:
 					lb1[msg].config(background = 'green1')
 					lb1[msg].update()
 				for att in self.handled_attachments[msg]:
+					try:
+						printcbVariables[att[0]].get()
+					except:
+						continue
 					if printcbVariables[att[0]].get():
 						print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
 								   convertcbVars[att[0]].get())

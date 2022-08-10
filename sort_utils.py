@@ -1,10 +1,13 @@
 import glob
+import os
 import tempfile
 from difflib import SequenceMatcher
 import patoolib
 from PDFNetPython3 import *
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import PyPDF2
+# import fitz
+import win32com
 
 a4orig = [612.1, 842.0]  # оригинальный формат А4
 a4small = [i * 0.99 for i in a4orig]  # размер для масштабирования под область печати
@@ -207,3 +210,53 @@ def twoUP(filepath):
 	with open(outpath, 'wb') as out:
 		merged_file.write(out)
 	return outpath
+
+
+def word2pdf(origfile):
+	"""
+	Конвертация из word в pdf с помощью API офиса, создает файл в той же директории
+	:param origfile: путь к файлу
+	:return: путь к сконвертированному файлу
+	"""
+	convfile = f'{origfile}.pdf'
+	word = win32com.client.Dispatch('Word.Application')
+	doc = word.Documents.Open(origfile)
+	doc.SaveAs(convfile, FileFormat = 17)
+	doc.Close()
+	word.Quit()
+	os.remove(origfile)
+	neworigfile = f'{origfile.rsplit(".", 1)[0]}.pdf'
+	try:
+		os.rename(convfile, neworigfile)
+	except:
+		neworigfile = f'{origfile.rsplit(".", 1)[0]}..pdf'
+		os.rename(convfile, neworigfile)
+	return neworigfile
+
+# def pdf2images(origfile):
+# 	list_files = []
+# 	zoom_x = 2.0  # horizontal zoom
+# 	zoom_y = 2.0  # vertical zoom
+# 	mat = fitz.Matrix(zoom_x, zoom_y)  # zoom factor 2 in each dimension
+# 	doc = fitz.open(origfile)  # open document
+# 	for page in doc:  # iterate through the pages
+# 		pix = page.get_pixmap(matrix = mat)  # render page to an image
+# 		outpath = origfile + f'_{page.number:02}.png'
+# 		pix.save(outpath)  # store image as a PNG
+# 		list_files.append(outpath)
+# 	return list_files
+
+
+# def images2pdf(list_files):
+# 	doc = fitz.open()  # PDF with the pictures
+# 	for i in list_files:
+# 		img = fitz.open(i)  # open pic as document
+# 		rect = img[0].rect  # pic dimension
+# 		pdfbytes = img.convert_to_pdf()  # make a PDF stream
+# 		img.close()  # no longer needed
+# 		imgPDF = fitz.open("pdf", pdfbytes)  # open stream as PDF
+# 		page = doc.new_page(width = rect.width,  # new page with ...
+# 							height = rect.height)  # pic dimension
+# 		page.show_pdf_page(rect, imgPDF, 0)  # image fills the page
+# 	doc.save(list_files[0] + '.pdf')
+# 	return list_files[0] + '.pdf'
