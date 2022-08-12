@@ -39,9 +39,8 @@ class main_sorter:
 			zipObj.extractall(foldername)
 		if self.config.deletezip == 'yes':
 			os.remove(givenpath)
-		siglist = glob.glob("{0}{1}*.sig".format(foldername, os.sep))
-		for i in siglist:
-			os.remove(i)
+		siglist = glob.glob(foldername + os.sep + "*.sig")
+		[os.remove(i) for i in siglist]
 		abspathlist = glob.glob(foldername + os.sep + "*")
 		basedoclist = []
 		for i in abspathlist:
@@ -49,12 +48,12 @@ class main_sorter:
 					'Protokol_proverki_fayla_'):
 				basedoclist.append(i)
 		doclist = [word2pdf(i) if i.endswith(('.doc', '.docx')) else i for i in basedoclist]
-		doclist = [imagepdf(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
+		doclist = [convertalmosetany(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
 		protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
 		kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[')]
 		if not kvitanciya:
 			return
-		doc_list = extracttext(kvitanciya)
+		doc_list = extracttext(kvitanciya[0])
 		queue = {}
 		queue[int('-2')] = os.path.basename(kvitanciya[0])
 		for i in doclist:

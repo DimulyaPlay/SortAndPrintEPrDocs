@@ -9,9 +9,9 @@ from sort_utils import *
 class Message_handler:
 	def __init__(self):
 		self.outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-		self.allowed_ext = ['.doc', '.docx', '.pdf', '.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.heic']
+		self.allowed_ext = ['.doc', '.docx', '.pdf', '.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.heic', '.rtf']
 		self.allowed_ext_img = ['.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.heic']
-		self.allowed_ext_docs = ['.doc', '.docx']
+		self.allowed_ext_docs = ['.doc', '.docx', '.rtf']
 		self.allowed_ext_archives = ['.7z', '.rar', '.zip']
 
 	@staticmethod
@@ -58,12 +58,9 @@ class Message_handler:
 			if ext in self.allowed_ext:
 				if ext != '.pdf':
 					if ext in self.allowed_ext_img:
-						pdfdoc = PDFDoc()
-						Convert.ToPdf(pdfdoc, fp)
-						pdfdoc.Save(fp + '.pdf', SDFDoc.e_compatibility)
-						pdfdoc.Close()
-						num_pgs, num_pps = check_num_pages(fp + '.pdf')
-						new_list_fp_fn_pgs_pps_isprnt.append([fp + '.pdf', fn, num_pgs, num_pps, 1])
+						fp = convertalmosetany(fp)
+						num_pgs, num_pps = check_num_pages(fp)
+						new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
 					if ext in self.allowed_ext_docs:
 						fp = word2pdf(fp)
 						num_pgs, num_pps = check_num_pages(fp)
@@ -218,7 +215,7 @@ class Message_handler:
 			lb1[filepath].grid(column = 1, row = currentrow, sticky = W)
 			lb1[filepath].bind('<Double-Button-1>', lambda event, a = self.orig_messages[filepath]:os.startfile(a))
 			currentrow += 1
-			for j, att in enumerate(self.handled_attachments[filepath]):
+			for att in self.handled_attachments[filepath]:
 				current_key = att[0]
 				current_name = att[1]
 				current_pages = att[2]
@@ -237,11 +234,12 @@ class Message_handler:
 					convertcb = Checkbutton(container, variable = convertcbVars[current_key],
 											command = update_num_pages)
 					convertcb.var = convertcbVars[current_key]
+					convertcb.grid(column = 6, row = currentrow, sticky = W)
 
 				else:
 					prntchb = Checkbutton(container, state = DISABLED)
 				prntchb.grid(column = 0, row = currentrow, sticky = W, padx = padx / 2)
-				convertcb.grid(column = 6, row = currentrow, sticky = W)
+
 				lb1[current_key] = Label(container, text = current_name, font = 'TkFixedFont')
 				lb1[current_key].grid(column = 1, row = currentrow, sticky = W, padx = padx)
 				lb1[current_key].bind('<Double-Button-1>', lambda event, a = current_key:os.startfile(a))

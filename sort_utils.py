@@ -33,8 +33,7 @@ def extracttext(path):
 	:param path: путь к файлу
 	:return: текст файла
 	"""
-	doc = PDFDoc(path[0])
-	# doc.InitSecurityHandler()
+	doc = PDFDoc(path)
 	n_pages = doc.GetPageCount()
 	txt = TextExtractor()
 	all_text = ''
@@ -233,30 +232,11 @@ def word2pdf(origfile):
 		os.rename(convfile, neworigfile)
 	return neworigfile
 
-# def pdf2images(origfile):
-# 	list_files = []
-# 	zoom_x = 2.0  # horizontal zoom
-# 	zoom_y = 2.0  # vertical zoom
-# 	mat = fitz.Matrix(zoom_x, zoom_y)  # zoom factor 2 in each dimension
-# 	doc = fitz.open(origfile)  # open document
-# 	for page in doc:  # iterate through the pages
-# 		pix = page.get_pixmap(matrix = mat)  # render page to an image
-# 		outpath = origfile + f'_{page.number:02}.png'
-# 		pix.save(outpath)  # store image as a PNG
-# 		list_files.append(outpath)
-# 	return list_files
 
+def convertalmosetany(fp):
+	pdfdoc = PDFDoc()
+	Convert.ToPdf(pdfdoc, fp)
+	pdfdoc.Save(fp + '.pdf', SDFDoc.e_compatibility)
+	pdfdoc.Close()
+	return fp + '.pdf'
 
-# def images2pdf(list_files):
-# 	doc = fitz.open()  # PDF with the pictures
-# 	for i in list_files:
-# 		img = fitz.open(i)  # open pic as document
-# 		rect = img[0].rect  # pic dimension
-# 		pdfbytes = img.convert_to_pdf()  # make a PDF stream
-# 		img.close()  # no longer needed
-# 		imgPDF = fitz.open("pdf", pdfbytes)  # open stream as PDF
-# 		page = doc.new_page(width = rect.width,  # new page with ...
-# 							height = rect.height)  # pic dimension
-# 		page.show_pdf_page(rect, imgPDF, 0)  # image fills the page
-# 	doc.save(list_files[0] + '.pdf')
-# 	return list_files[0] + '.pdf'

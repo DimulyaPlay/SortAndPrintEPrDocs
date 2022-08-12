@@ -13,7 +13,7 @@ from stats_module import stat_loader
 
 # ver = '3.4.4'
 ver = '1.0.8_TRON'
-curdate = '2022/08/08'
+curdate = '2022/08/12'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
