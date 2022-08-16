@@ -1,12 +1,12 @@
 import glob
 import os
 import tempfile
+import time
 from difflib import SequenceMatcher
 import patoolib
 from PDFNetPython3 import *
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import PyPDF2
-# import fitz
 import win32com
 
 a4orig = [612.1, 842.0]  # оригинальный формат А4
@@ -107,8 +107,11 @@ def print_file(filepath, mode, currentprinter, convert = False):
 			Convert.ToTiff(doc, filepath + '.tiff')
 	if mode == 4:
 		printerMode.SetNUp(2, 2, PrinterMode.e_PageOrder_LeftToRightThenTopToBottom)
+	starttime = time.time()
 	Print.StartPrintJob(doc, currentprinter, doc.GetFileName(), "", None, printerMode, None)
+	deltatime = time.time() - starttime
 	doc.Close()
+	return deltatime
 
 
 def parse_names(names: str):
@@ -240,3 +243,9 @@ def convertalmosetany(fp):
 	pdfdoc.Close()
 	return fp + '.pdf'
 
+
+def pdf2word(fp):
+	cv = Converter(fp)
+	cv.convert(fp + '.docx')  # all pages by default
+	cv.close()
+	return fp + '.docx'

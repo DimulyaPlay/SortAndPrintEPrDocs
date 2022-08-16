@@ -12,7 +12,7 @@ class stat_loader:
 		"""
 		self.columns = ['Дата и время', 'Номер', 'Кол-во док-ов', 'Кол-во страниц в документах',
 						'Кол-во листов в документах', 'Напечатано док-ов', 'Затрата без эко была бы',
-						'Затрачено листов', 'Сэкономлено листов']
+						'Затрачено листов', 'Сэкономлено листов', 'Постановка в очередь заняла']
 		self.statfile_path = statfile_path
 		if os.path.exists(self.statfile_path):
 			self.statfile = pd.read_excel(self.statfile_path)

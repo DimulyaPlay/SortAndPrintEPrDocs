@@ -9,8 +9,8 @@ from sort_utils import *
 class Message_handler:
 	def __init__(self):
 		self.outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-		self.allowed_ext = ['.doc', '.docx', '.pdf', '.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.heic', '.rtf']
-		self.allowed_ext_img = ['.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.heic']
+		self.allowed_ext = ['.doc', '.docx', '.pdf', '.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.rtf']
+		self.allowed_ext_img = ['.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif']
 		self.allowed_ext_docs = ['.doc', '.docx', '.rtf']
 		self.allowed_ext_archives = ['.7z', '.rar', '.zip']
 

@@ -13,7 +13,7 @@ from stats_module import stat_loader
 
 # ver = '3.4.4'
 ver = '1.0.8_TRON'
-curdate = '2022/08/12'
+curdate = '2022/08/16'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -131,7 +131,9 @@ def print_dialog():
 		print_button.update()
 		for fp, prntcbvar in printcbVariables.items():
 			if prntcbvar.get():
-				print_file(fp, rbVariables[fp].get(), current_config.default_printer, convertVars[fp].get())
+				to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
+										   convertVars[fp].get())
+				stat_writer.statdict['Постановка в очередь заняла'] = to_queue_time
 				prntcbvar.set(0)
 				lb1[fp].config(background = 'green1')
 				lb1[fp].update()
