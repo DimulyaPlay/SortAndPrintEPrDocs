@@ -12,7 +12,7 @@ from sorter_class import *
 from stats_module import stat_loader
 
 # ver = '3.4.4'
-ver = '1.0.9_TRON'
+ver = '1.0.10_TRON'
 curdate = '2022/08/18'
 
 if getattr(sys, 'frozen', False):

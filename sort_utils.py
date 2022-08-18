@@ -85,6 +85,7 @@ def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empt
 	"""
 	Отправка документа в очередь печати с заданными параметрами
 
+	:param fileName: имя, которое сохранится в логе spooler
 	:param filepath: путь к файлу
 	:param mode: расположение страниц на листе
 
@@ -214,18 +215,32 @@ def twoUP(filepath):
 	return outpath
 
 
-def word2pdf(origfile):
+def office2pdf(origfile):
 	"""
 	Конвертация из word в pdf с помощью API офиса, создает файл в той же директории
+	:param ext: расширение файла
 	:param origfile: путь к файлу
 	:return: путь к сконвертированному файлу
 	"""
+	ext = '.' + origfile.rsplit('.', 1)[1].lower()
 	convfile = f'{origfile}.pdf'
-	word = win32com.client.Dispatch('Word.Application')
-	doc = word.Documents.Open(origfile)
-	doc.SaveAs(convfile, FileFormat = 17)
-	doc.Close()
-	word.Quit()
+	wordext = ['.odt', '.rtf', '.doc', '.docx']
+	excelext = ['.ods', '.xls', '.xlsx']
+	if ext in wordext:
+		word = win32com.client.Dispatch('Word.Application')
+		doc = word.Documents.Open(origfile)
+		doc.SaveAs(convfile, FileFormat = 17)
+		doc.Close()
+		doc = None
+		word.Quit()
+		word = None
+	if ext in excelext:
+		excel = win32com.client.Dispatch("Excel.Application")
+		book = excel.Workbooks.Open(Filename = origfile)
+		book.ExportAsFixedFormat(0, convfile)
+		book = None
+		excel.Quit()
+		excel = None
 	os.remove(origfile)
 	neworigfile = f'{origfile.rsplit(".", 1)[0]}.pdf'
 	try:

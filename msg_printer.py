@@ -9,9 +9,10 @@ from sort_utils import *
 class Message_handler:
 	def __init__(self):
 		self.outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-		self.allowed_ext = ['.doc', '.docx', '.pdf', '.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.rtf']
+		self.allowed_ext = ['.doc', '.docx', '.pdf', '.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif', '.rtf', '.ods',
+							'.odt', '.xlsx', '.xls']
 		self.allowed_ext_img = ['.jpg', '.jpeg', '.tif', '.tiff', '.png', '.gif']
-		self.allowed_ext_docs = ['.doc', '.docx', '.rtf']
+		self.allowed_ext_docs = ['.doc', '.docx', '.rtf', '.odt', '.ods', '.xlsx', '.xls']
 		self.allowed_ext_archives = ['.7z', '.rar', '.zip']
 
 	@staticmethod
@@ -62,7 +63,7 @@ class Message_handler:
 						num_pgs, num_pps = check_num_pages(fp)
 						new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
 					if ext in self.allowed_ext_docs:
-						fp = word2pdf(fp)
+						fp = office2pdf(fp)
 						num_pgs, num_pps = check_num_pages(fp)
 						new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
 				if ext == '.pdf':
