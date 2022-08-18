@@ -81,7 +81,7 @@ def concat_pdfs(master, wingman):
 	return master, is_paper_eco
 
 
-def print_file(filepath, mode, currentprinter, convert = False):
+def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empty'):
 	"""
 	Отправка документа в очередь печати с заданными параметрами
 
@@ -108,7 +108,7 @@ def print_file(filepath, mode, currentprinter, convert = False):
 	if mode == 4:
 		printerMode.SetNUp(2, 2, PrinterMode.e_PageOrder_LeftToRightThenTopToBottom)
 	starttime = time.time()
-	Print.StartPrintJob(doc, currentprinter, doc.GetFileName(), "", None, printerMode, None)
+	Print.StartPrintJob(doc, currentprinter, fileName, "", None, printerMode, None)
 	deltatime = time.time() - starttime
 	doc.Close()
 	return deltatime

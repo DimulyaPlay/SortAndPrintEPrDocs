@@ -12,8 +12,8 @@ from sorter_class import *
 from stats_module import stat_loader
 
 # ver = '3.4.4'
-ver = '1.0.8_TRON'
-curdate = '2022/08/16'
+ver = '1.0.9_TRON'
+curdate = '2022/08/18'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -132,7 +132,7 @@ def print_dialog():
 		for fp, prntcbvar in printcbVariables.items():
 			if prntcbvar.get():
 				to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
-										   convertVars[fp].get())
+										   convertVars[fp].get(), os.path.basename(fp))
 				stat_writer.statdict['Постановка в очередь заняла'] = to_queue_time
 				prntcbvar.set(0)
 				lb1[fp].config(background = 'green1')
