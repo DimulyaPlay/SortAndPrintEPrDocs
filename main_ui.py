@@ -1,5 +1,6 @@
 import os.path
 import time
+import glob
 from functools import partial
 from tkinter import *
 from tkinter import messagebox
@@ -12,7 +13,8 @@ from sorter_class import *
 from stats_module import stat_loader
 
 # ver = '3.4.4'
-ver = '1.0.10_TRON'
+# ver = '1.0.10_TRON'
+ver = '1.0_JPrinter'
 curdate = '2022/08/18'
 
 if getattr(sys, 'frozen', False):
@@ -20,6 +22,7 @@ if getattr(sys, 'frozen', False):
 elif __file__:
 	application_path = os.path.dirname(__file__)
 
+os.startfile(glob.glob(application_path + '//*.jar')[0])
 license_name = 'PDFTron_license_key.txt'  # название файла с лицензией
 config_name = 'config.ini'  # название файла конфигурации
 stats_name = 'statistics.xlsx'  # название файла статистики
@@ -70,6 +73,7 @@ def move_app(e):
 
 
 def quitter(e):
+	os.system('taskkill /f /im javaw.exe')
 	root.quit()
 	root.destroy()
 

@@ -5,12 +5,14 @@ import time
 from difflib import SequenceMatcher
 import patoolib
 from PDFNetPython3 import *
-from PyPDF2 import PdfFileReader, PdfFileWriter
+from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 import PyPDF2
 import win32com
+from py4j.java_gateway import JavaGateway
 
+gateway = JavaGateway()
 a4orig = [612.1, 842.0]  # оригинальный формат А4
-a4small = [i * 0.99 for i in a4orig]  # размер для масштабирования под область печати
+a4small = [i * 0.95 for i in a4orig]  # размер для масштабирования под область печати
 
 
 def initPDFTron(lc):
@@ -93,25 +95,19 @@ def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empt
 
 	:param convert: принудительная конвертация
 	"""
-	doc = PDFDoc(filepath)
-	printerMode = PrinterMode()
-	printerMode.SetAutoCenter(True)
-	printerMode.SetAutoRotate(True)
-	printerMode.SetScaleType(PrinterMode.e_ScaleType_ReduceToOutputPage)
-	printerMode.SetNUp(1, 1)
-	if convert:
-		Convert.ToTiff(doc, filepath + '.tiff')
+	if mode == 1:
+		try:
+			filepath = fitPdfInA4(filepath)
+		except:
+			print('Fitting error with: ', fileName)
+			pass
 	if mode == 2:
-		doc.Close()
-		doc = PDFDoc(twoUP(filepath))
-		if not convert:
-			Convert.ToTiff(doc, filepath + '.tiff')
+		filepath = twoUP(filepath)
 	if mode == 4:
-		printerMode.SetNUp(2, 2, PrinterMode.e_PageOrder_LeftToRightThenTopToBottom)
+		filepath = fourUP(filepath)
 	starttime = time.time()
-	Print.StartPrintJob(doc, currentprinter, fileName, "", None, printerMode, None)
+	gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
 	deltatime = time.time() - starttime
-	doc.Close()
 	return deltatime
 
 
@@ -162,7 +158,15 @@ def fitPdfInA4(pdfpath):
 	:param pdfpath: путь к файлу
 	:return: outpath - путь к сформированному temp-файлу
 	"""
-	pdf = PdfFileReader(pdfpath)
+	writer = PdfFileWriter()
+	pdf = PdfFileReader(pdfpath, strict = False)
+	for page in pdf.pages:
+		writer.addPage(page)
+	fd, tempoutpath = tempfile.mkstemp('.pdf')
+	os.close(fd)
+	with open(tempoutpath, "wb") as fp:
+		writer.write(fp)
+	pdf = PdfFileReader(tempoutpath)
 	new_pdf = PdfFileWriter()
 	for page in pdf.pages:
 		page_width = page.mediaBox.getWidth()
@@ -195,8 +199,12 @@ def twoUP(filepath):
 	:param filepath: Путь к файлу
 	:return: путь к сформированному temp-файлу
 	"""
+	try:
+		rotated_pdf = fitPdfInA4(filepath)
+	except:
+		print('Fitting error with: ', filepath)
+		pass
 	merged_file = PdfFileWriter()
-	rotated_pdf = fitPdfInA4(filepath)
 	orig_file = PdfFileReader(rotated_pdf, strict = False)
 	n_pages = len(orig_file.pages)
 	for i in range(0, n_pages, 2):
@@ -215,10 +223,38 @@ def twoUP(filepath):
 	return outpath
 
 
+def fourUP(filepath):
+	rotated_pdf = fitPdfInA4(filepath)
+	orig_file = PdfFileReader(rotated_pdf, strict = False)
+	merged_file = PdfFileWriter()
+	n_pages = len(orig_file.pages)
+	for i in range(0, n_pages, 4):
+		big_page = PyPDF2.pdf.PageObject.createBlankPage(width = 595.2, height = 842.88)
+		big_page.mergeScaledTranslatedPage(orig_file.pages[i], scale = 0.48, tx = 10, ty = 411.44)
+		try:
+			big_page.mergeScaledTranslatedPage(orig_file.pages[i + 1], scale = 0.48, tx = 288, ty = 411.44)
+		except:
+			pass
+
+		try:
+			big_page.mergeScaledTranslatedPage(orig_file.pages[i + 2], scale = 0.48, tx = 10, ty = 10)
+		except:
+			pass
+		try:
+			big_page.mergeScaledTranslatedPage(orig_file.pages[i + 3], scale = 0.48, tx = 283, ty = 10)
+		except:
+			pass
+	merged_file.addPage(big_page)
+	fd, outpath = tempfile.mkstemp('.pdf')
+	os.close(fd)
+	with open(outpath, 'wb') as out:
+		merged_file.write(out)
+	return outpath
+
+
 def office2pdf(origfile):
 	"""
 	Конвертация из word в pdf с помощью API офиса, создает файл в той же директории
-	:param ext: расширение файла
 	:param origfile: путь к файлу
 	:return: путь к сконвертированному файлу
 	"""
