@@ -91,14 +91,13 @@ class main_sorter:
 				if i + 1 in all_keys:  # Если экомод, то проверяем есть ли протокол для файла
 					if queue[i + 1].startswith(
 							'Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
-						merged_file, is_paper_eco = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
-																'{0}\\{1}'.format(foldername, queue[i + 1]))
-						# os.remove('{0}\\{1}'.format(foldername, queue[i]))
+						merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
+												  '{0}\\{1}'.format(foldername, queue[i + 1]))
+						os.remove('{0}\\{1}'.format(foldername, queue[i]))
 						os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
 						queue_files.append(merged_file)
 						numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
 						queue_num_files.append(numered_file)
-						self.num_protocols_eco[numered_file] = is_paper_eco
 						counter += 1
 				else:
 					if not queue[i].startswith('Protokol_proverki_fayla_'):
@@ -113,6 +112,7 @@ class main_sorter:
 			if os.path.exists(i):
 				os.replace(i, j)
 				self.num_pages[j] = check_num_pages(j)
+				self.num_protocols_eco[j] = int(self.num_pages[j][0] % 2 != 1)
 				self.files_for_print.append(j)
 		if self.config.save_stat == 'yes':
 			docnumber = os.path.basename(givenpath).split('_', 1)[0]

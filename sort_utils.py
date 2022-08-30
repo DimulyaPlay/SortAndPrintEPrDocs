@@ -36,16 +36,7 @@ def extracttext(path):
 	:param path: путь к файлу
 	:return: текст файла
 	"""
-	doc = PDFDoc(path)
-	n_pages = doc.GetPageCount()
-	txt = TextExtractor()
-	all_text = ''
-	for i in range(n_pages):
-		page = doc.GetPage(i + 1)
-		txt.Begin(page)
-		text = txt.GetAsText()
-		all_text += text
-	doc.Close()
+	all_text = gateway.entry_point.extractTextFromPdf(path)
 	return all_text.replace('\n', '')
 
 
@@ -73,15 +64,8 @@ def concat_pdfs(master, wingman):
 
 	:return: str путь к обьединенному пдф, bool сохранен ли лист
 	"""
-	doc1 = PDFDoc(master)
-	doc2 = PDFDoc(wingman)
-	page_num = doc1.GetPageCount()
-	doc1.InsertPages(page_num + 1, doc2, 1, doc2.GetPageCount(), PDFDoc.e_none)
-	doc1.Save(master, SDFDoc.e_remove_unused)
-	doc1.Close()
-	doc2.Close()
-	is_paper_eco = page_num % 2
-	return master, is_paper_eco
+	out = gateway.entry_point.concatenateTwoPdfs(master, wingman)
+	return out
 
 
 def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empty'):
