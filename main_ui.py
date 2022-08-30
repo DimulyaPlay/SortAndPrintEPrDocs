@@ -14,8 +14,8 @@ from stats_module import stat_loader
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
-ver = '1.0_JPrinter'
-curdate = '2022/08/26'
+ver = '1.01_JPrinter'
+curdate = '2022/08/30'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
