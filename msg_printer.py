@@ -59,7 +59,7 @@ class Message_handler:
 			if ext in self.allowed_ext:
 				if ext != '.pdf':
 					if ext in self.allowed_ext_img:
-						fp = convertalmosetany(fp)
+						fp = convertImageWithJava(fp)
 						num_pgs, num_pps = check_num_pages(fp)
 						new_list_fp_fn_pgs_pps_isprnt.append([fp, fn, num_pgs, num_pps, 1])
 					if ext in self.allowed_ext_docs:

@@ -49,7 +49,7 @@ class main_sorter:
 				basedoclist.append(i)
 		doclist = [office2pdf(i) if i.endswith(('.doc', '.docx', '.rtf', '.odt', '.ods', '.xls', '.xlsx')) else i for i
 				   in basedoclist]
-		doclist = [convertalmosetany(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
+		doclist = [convertImageWithJava(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
 		protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
 		kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[')]
 		if not kvitanciya:

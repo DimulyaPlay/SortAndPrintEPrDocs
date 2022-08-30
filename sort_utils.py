@@ -288,12 +288,8 @@ def office2pdf(origfile):
 	return neworigfile
 
 
-def convertalmosetany(fp):
-	pdfdoc = PDFDoc()
-	Convert.ToPdf(pdfdoc, fp)
-	pdfdoc.Save(fp + '.pdf', SDFDoc.e_compatibility)
-	pdfdoc.Close()
-	return fp + '.pdf'
+def convertImageWithJava(fp):
+	return gateway.entry_point.generatePDFFromImage(fp)
 
 
 def pdf2word(fp):
