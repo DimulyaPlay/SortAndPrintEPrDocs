@@ -11,11 +11,12 @@ from msg_printer import Message_handler
 from scrollable_frame import VerticalScrolledFrame
 from sorter_class import *
 from stats_module import stat_loader
+import subprocess
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
-ver = '1.01_JPrinter'
-curdate = '2022/08/30'
+ver = '1.02_JPrinter'
+curdate = '2022/08/31'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -23,7 +24,6 @@ elif __file__:
 	application_path = os.path.dirname(__file__)
 
 os.startfile(glob.glob(application_path + '//*.jar')[0])
-license_name = 'PDFTron_license_key.txt'  # название файла с лицензией
 config_name = 'config.ini'  # название файла конфигурации
 stats_name = 'statistics.xlsx'  # название файла статистики
 PDF_PRINT_NAME = 'PDFtoPrinter.exe'  # название файла программы для печати
@@ -31,17 +31,9 @@ printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LO
 statfile_path = os.path.join(application_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(application_path, config_name)  # полный путь файла конфигурации
 PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)  # полный путь программы для печати
-license_path = os.path.join(application_path, license_name)
 config_paths = [config_path, PDF_PRINT_FILE]
 
 current_config = config_file(config_paths)
-
-if os.path.exists(license_path):
-	with open(license_path, 'r') as lic:
-		LICENSE_KEY = lic.readline()
-else:
-	LICENSE_KEY = 'demo:1651643691881:7bbe6e960300000000f44976dbcbd47a0cb10a4317da3b8120ca6a1ff8'
-initPDFTron(LICENSE_KEY)
 
 if current_config.save_stat == 'yes':
 	stat_writer = stat_loader(statfile_path)

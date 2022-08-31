@@ -93,8 +93,6 @@ class main_sorter:
 							'Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
 						merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
 												  '{0}\\{1}'.format(foldername, queue[i + 1]))
-						os.remove('{0}\\{1}'.format(foldername, queue[i]))
-						os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
 						queue_files.append(merged_file)
 						numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
 						queue_num_files.append(numered_file)

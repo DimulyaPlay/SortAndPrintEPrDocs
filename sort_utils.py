@@ -4,7 +4,6 @@ import tempfile
 import time
 from difflib import SequenceMatcher
 import patoolib
-from PDFNetPython3 import *
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 import PyPDF2
 import win32com
@@ -37,7 +36,7 @@ def extracttext(path):
 	:return: текст файла
 	"""
 	all_text = gateway.entry_point.extractTextFromPdf(path)
-	return all_text.replace('\n', '')
+	return all_text
 
 
 def check_num_pages(path):
@@ -47,11 +46,10 @@ def check_num_pages(path):
 	:param path: путь к файлу
 	:return: лист - страниц, листов
 	"""
-	doc = PDFDoc(path)
-	n_pages = doc.GetPageCount()
+	doc = PdfFileReader(path)
+	n_pages = doc.numPages
 	pages = n_pages
 	papers = int(pages / 2 + 0.9)
-	doc.Close()
 	return [pages, papers]
 
 
@@ -274,10 +272,3 @@ def office2pdf(origfile):
 
 def convertImageWithJava(fp):
 	return gateway.entry_point.generatePDFFromImage(fp)
-
-
-def pdf2word(fp):
-	cv = Converter(fp)
-	cv.convert(fp + '.docx')  # all pages by default
-	cv.close()
-	return fp + '.docx'
