@@ -2,8 +2,6 @@
 future~=0.18.2
 pandas~=1.4.0
 patool~=1.12
-PDFNetPython3~=9.3.0
-ipython~=8.0.1
-traitlets~=5.1.1
 PyPDF2~=1.26.0
 py4j~=0.10.9.7
+pdfplumber~=0.6.0

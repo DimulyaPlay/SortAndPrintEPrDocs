@@ -15,7 +15,7 @@ import subprocess
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
-ver = '1.02_JPrinter'
+ver = '1.02_JPrinterVer, 0.2_JavaUtils'
 curdate = '2022/08/31'
 
 if getattr(sys, 'frozen', False):

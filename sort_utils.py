@@ -6,6 +6,7 @@ from difflib import SequenceMatcher
 import patoolib
 from PyPDF2 import PdfFileReader, PdfFileWriter, PdfFileMerger
 import PyPDF2
+import pdfplumber
 import win32com
 from py4j.java_gateway import JavaGateway
 from py4j import java_collections
@@ -46,8 +47,9 @@ def check_num_pages(path):
 	:param path: путь к файлу
 	:return: лист - страниц, листов
 	"""
-	doc = PdfFileReader(path)
-	n_pages = doc.numPages
+	doc = pdfplumber.open(path)
+	n_pages = len(doc.pages)
+	doc.close()
 	pages = n_pages
 	papers = int(pages / 2 + 0.9)
 	return [pages, papers]
