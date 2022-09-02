@@ -16,10 +16,6 @@ a4orig = [612.1, 842.0]  # оригинальный формат А4
 a4small = [i * 0.95 for i in a4orig]  # размер для масштабирования под область печати
 
 
-def initPDFTron(lc):
-	PDFNet.Initialize(lc)
-
-
 def similar(a: str, b: str) -> float:
 	"""
 	Сравенение двух последовательностей для сравнения имен файлов
@@ -55,6 +51,27 @@ def check_num_pages(path):
 	return [pages, papers]
 
 
+def splitBy10(filepath):
+	reader = PdfFileReader(filepath)
+	n_pages = reader.numPages
+	splitter = round((n_pages / 10) + 0.5)
+	filepaths = []
+	if n_pages > 10:
+		for i in range(splitter):
+			writer = PdfFileWriter()
+			for j in range(i * 10, (i + 1) * 10):
+				if j < n_pages:
+					writer.addPage(reader.pages[j])
+			outpath = f"{filepath}_{i}th.pdf"
+			with open(outpath, mode = 'wb') as export:
+				writer.write(export)
+			filepaths.append(outpath)
+	else:
+		return [filepath]
+
+	return filepaths
+
+
 def concat_pdfs(master, wingman):
 	"""
 	Конкатенация пдф файлов
@@ -80,6 +97,7 @@ def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empt
 
 	:param convert: принудительная конвертация
 	"""
+
 	if mode == 1:
 		try:
 			filepath = fitPdfInA4(filepath)
@@ -91,7 +109,10 @@ def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empt
 	if mode == 4:
 		filepath = fourUP(filepath)
 	starttime = time.time()
-	gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
+	filepaths = splitBy10(filepath)
+	print(filepaths)
+	for filepath in filepaths:
+		gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
 	deltatime = time.time() - starttime
 	return deltatime
 
