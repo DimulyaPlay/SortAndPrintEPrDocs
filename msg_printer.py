@@ -145,8 +145,7 @@ class Message_handler:
 					except:
 						continue
 					if printcbVariables[att[0]].get():
-						print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
-								   convertcbVars[att[0]].get(), att[1])
+						print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer, att[1])
 						printcbVariables[att[0]].set(0)
 						lb1[att[0]].config(background = 'green1')
 						lb1[att[0]].update()
@@ -183,7 +182,7 @@ class Message_handler:
 			width = 26
 		if width > 68:
 			width = 68
-		width = (width * 7) + 225
+		width = (width * 7) + 205
 		if height > MAXHEIGHT:
 			height = MAXHEIGHT
 		container = VerticalScrolledFrame(dialog, height = height, width = width)
@@ -191,7 +190,6 @@ class Message_handler:
 		rbVariables = {}
 		lb1 = {}
 		printcbVariables = {}
-		convertcbVars = {}
 		prntchballvar = BooleanVar()
 		prntchballvar.set(1)
 		prntchball = Checkbutton(container, variable = prntchballvar, command = check_all_chbtns)
@@ -230,13 +228,6 @@ class Message_handler:
 					prntchb = Checkbutton(container, variable = printcbVariables[current_key],
 										  command = update_num_pages)
 					prntchb.var = printcbVariables[current_key]
-					convertcbVars[current_key] = BooleanVar()
-					convertcbVars[current_key].set(0)
-					convertcb = Checkbutton(container, variable = convertcbVars[current_key],
-											command = update_num_pages)
-					convertcb.var = convertcbVars[current_key]
-					convertcb.grid(column = 6, row = currentrow, sticky = W)
-
 				else:
 					prntchb = Checkbutton(container, state = DISABLED)
 				prntchb.grid(column = 0, row = currentrow, sticky = W, padx = padx / 2)

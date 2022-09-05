@@ -15,8 +15,8 @@ import subprocess
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
-ver = '1.02_JPrinterVer, 0.2_JavaUtils'
-curdate = '2022/08/31'
+ver = '1.0_3_JPrinterVer, 0.5_JavaUtils'
+curdate = '2022/09/5'
 
 if getattr(sys, 'frozen', False):
 	application_path = os.path.dirname(sys.executable)
@@ -128,7 +128,7 @@ def print_dialog():
 		for fp, prntcbvar in printcbVariables.items():
 			if prntcbvar.get():
 				to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
-										   convertVars[fp].get(), os.path.basename(fp))
+										   os.path.basename(fp))
 				stat_writer.statdict['Постановка в очередь заняла'] = to_queue_time
 				prntcbvar.set(0)
 				lb1[fp].config(background = 'green1')
@@ -142,7 +142,6 @@ def print_dialog():
 			stat_writer.statdict[
 				'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
 			stat_writer.add_and_save_stats()
-		# info_show_printed()
 		update_num_pages()
 		print_button.config(relief = RAISED)
 		print_button.bind("<Button-1>", apply_print)
@@ -188,13 +187,12 @@ def print_dialog():
 
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
-									  width = 640)
+									  width = 620)
 	container.pack()
 	filepathsForPrint = sorterClass.files_for_print
 	printcbVariables = {}
 	rbVariables = {}
 	lb1 = {}
-	convertVars = {}
 	prntchballvar = BooleanVar()
 	prntchballvar.set(1)
 	prntchball = Checkbutton(container, variable = prntchballvar, command = check_all_chbtns)
@@ -225,10 +223,6 @@ def print_dialog():
 		rb2.grid(column = 4, row = current_row, sticky = W)
 		rb4 = Radiobutton(container, variable = rbVariables[fp], value = 4, command = update_num_pages)
 		rb4.grid(column = 5, row = current_row, sticky = W)
-		convertVars[fp] = BooleanVar()
-		convertVars[fp].set(0)
-		convertchb = Checkbutton(container, variable = convertVars[fp], command = update_num_pages)
-		convertchb.grid(column = 6, row = current_row, sticky = W)
 		current_row += 1
 	bottom_actions = Frame(dialog)
 	bottom_actions.pack()

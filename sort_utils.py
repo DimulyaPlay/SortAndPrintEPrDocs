@@ -85,7 +85,7 @@ def concat_pdfs(master, wingman):
 	return out
 
 
-def print_file(filepath, mode, currentprinter, convert = False, fileName = 'Empty'):
+def print_file(filepath, mode, currentprinter, fileName = 'Empty'):
 	"""
 	Отправка документа в очередь печати с заданными параметрами
 
