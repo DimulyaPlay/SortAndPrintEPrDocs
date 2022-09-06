@@ -182,7 +182,7 @@ class Message_handler:
 			width = 26
 		if width > 68:
 			width = 68
-		width = (width * 7) + 205
+		width = (width * 7) + 185
 		if height > MAXHEIGHT:
 			height = MAXHEIGHT
 		container = VerticalScrolledFrame(dialog, height = height, width = width)

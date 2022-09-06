@@ -125,16 +125,17 @@ def print_dialog():
 		print_button.unbind("<Button-1>")
 		print_button.config(relief = SUNKEN)
 		print_button.update()
+		stat_writer.statdict['Постановка в очередь заняла'] = 0
 		for fp, prntcbvar in printcbVariables.items():
 			if prntcbvar.get():
 				to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
 										   os.path.basename(fp))
-				stat_writer.statdict['Постановка в очередь заняла'] = to_queue_time
+				stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
 				prntcbvar.set(0)
 				lb1[fp].config(background = 'green1')
 				lb1[fp].update()
+				update_num_pages()
 		if current_config.save_stat == 'yes' and statsaver.get():
-			print('saving to stats')
 			stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
 			stat_writer.statdict[
 				'Затрата без эко была бы'] = full_dupl_len_for_print_var.get() + eco_protocols_var.get()
@@ -142,7 +143,7 @@ def print_dialog():
 			stat_writer.statdict[
 				'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
 			stat_writer.add_and_save_stats()
-		update_num_pages()
+			print('saved to stats')
 		print_button.config(relief = RAISED)
 		print_button.bind("<Button-1>", apply_print)
 
@@ -187,7 +188,7 @@ def print_dialog():
 
 	container = VerticalScrolledFrame(dialog, height = 550 if len(sorterClass.files_for_print) > 20 else (
 																												 len(sorterClass.files_for_print) + 1) * 25,
-									  width = 620)
+									  width = 600)
 	container.pack()
 	filepathsForPrint = sorterClass.files_for_print
 	printcbVariables = {}

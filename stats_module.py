@@ -29,4 +29,7 @@ class stat_loader:
 		"""
 		df_for_concat = pd.DataFrame([self.statdict])
 		self.statfile = pd.concat([self.statfile, df_for_concat])
-		self.statfile.to_excel(self.statfile_path, index = False)
+		try:
+			self.statfile.to_excel(self.statfile_path, index = False)
+		except:
+			print("Saving IO error")
