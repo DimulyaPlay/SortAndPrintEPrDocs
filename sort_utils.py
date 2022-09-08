@@ -51,24 +51,19 @@ def check_num_pages(path):
     return [pages, papers]
 
 
-def splitBy10(filepath):
+def splitBy10(filepath, n_pages):
     reader = PdfFileReader(filepath)
-    n_pages = reader.numPages
     splitter = round((n_pages / 10) + 0.5)
     filepaths = []
-    if n_pages > 10:
-        for i in range(splitter):
-            writer = PdfFileWriter()
-            for j in range(i * 10, (i + 1) * 10):
-                if j < n_pages:
-                    writer.addPage(reader.pages[j])
-            outpath = f"{filepath}_{i}th.pdf"
-            with open(outpath, mode='wb') as export:
-                writer.write(export)
-            filepaths.append(outpath)
-    else:
-        return [filepath]
-
+    for i in range(splitter):
+        writer = PdfFileWriter()
+        for j in range(i * 10, (i + 1) * 10):
+            if j < n_pages:
+                writer.addPage(reader.pages[j])
+        outpath = f"{filepath}_{i}th.pdf"
+        with open(outpath, mode='wb') as export:
+            writer.write(export)
+        filepaths.append(outpath)
     return filepaths
 
 
@@ -85,10 +80,11 @@ def concat_pdfs(master, wingman):
     return out
 
 
-def print_file(filepath, mode, currentprinter, fileName='Empty'):
+def print_file(filepath, mode, currentprinter, n_pages, fileName='Empty'):
     """
     Отправка документа в очередь печати с заданными параметрами
 
+    :param n_pages: количество страниц в пдф
     :param fileName: имя, которое сохранится в логе spooler
     :param filepath: путь к файлу
     :param mode: расположение страниц на листе
@@ -106,8 +102,10 @@ def print_file(filepath, mode, currentprinter, fileName='Empty'):
     if mode == 4:
         filepath = fourUP(filepath)
     starttime = time.time()
-    filepaths = splitBy10(filepath)
-    print(filepaths)
+    if n_pages > 10:
+        filepaths = splitBy10(filepath, n_pages)
+    else:
+        filepaths = [filepath]
     for filepath in filepaths:
         gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
     deltatime = time.time() - starttime

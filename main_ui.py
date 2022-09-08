@@ -134,6 +134,7 @@ def print_dialog():
         for fp, prntcbvar in printcbVariables.items():
             if prntcbvar.get():
                 to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
+                                           sorterClass.num_pages[fp][0],
                                            os.path.basename(fp))
                 stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
                 prntcbvar.set(0)
