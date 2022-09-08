@@ -12,14 +12,14 @@ class stat_loader:
 		"""
 		self.columns = ['Дата и время', 'Номер', 'Кол-во док-ов', 'Кол-во страниц в документах',
 						'Кол-во листов в документах', 'Напечатано док-ов', 'Затрата без эко была бы',
-						'Затрачено листов', 'Сэкономлено листов']
+						'Затрачено листов', 'Сэкономлено листов', 'Постановка в очередь заняла']
 		self.statfile_path = statfile_path
 		if os.path.exists(self.statfile_path):
 			self.statfile = pd.read_excel(self.statfile_path)
 			print('statfile read')
 		else:
 			self.statfile = pd.DataFrame(columns = self.columns)
-			self.savestat()
+			self.statfile.to_excel(self.statfile_path, index = False)
 			print('statfile created')
 		self.statdict = {i:0 for i in self.columns}
 
@@ -29,4 +29,7 @@ class stat_loader:
 		"""
 		df_for_concat = pd.DataFrame([self.statdict])
 		self.statfile = pd.concat([self.statfile, df_for_concat])
-		self.statfile.to_excel(self.statfile_path, index = False)
+		try:
+			self.statfile.to_excel(self.statfile_path, index = False)
+		except:
+			print("Saving IO error")

@@ -1,8 +1,6 @@
-import glob
 import random
 from datetime import datetime
 from zipfile import ZipFile
-
 from sort_utils import *
 
 
@@ -41,22 +39,22 @@ class main_sorter:
 			zipObj.extractall(foldername)
 		if self.config.deletezip == 'yes':
 			os.remove(givenpath)
-		siglist = glob.glob("{0}{1}*.sig".format(foldername, os.sep))
-		for i in siglist:
-			os.remove(i)
+		siglist = glob.glob(foldername + os.sep + "*.sig")
+		[os.remove(i) for i in siglist]
 		abspathlist = glob.glob(foldername + os.sep + "*")
 		basedoclist = []
 		for i in abspathlist:
 			if not os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[') and not os.path.basename(i).startswith(
 					'Protokol_proverki_fayla_'):
 				basedoclist.append(i)
-		doclist = [wordpdf(i) if i.endswith(('.doc', '.docx')) else i for i in basedoclist]
-		doclist = [imagepdf(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
+		doclist = [office2pdf(i) if i.endswith(('.doc', '.docx', '.rtf', '.odt', '.ods', '.xls', '.xlsx')) else i for i
+				   in basedoclist]
+		doclist = [convertImageWithJava(i) if i.endswith(('.jpg', '.jpeg', '.png', '.tif')) else i for i in doclist]
 		protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
 		kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[')]
 		if not kvitanciya:
 			return
-		doc_list = extracttext(kvitanciya)
+		doc_list = extracttext(kvitanciya[0])
 		queue = {}
 		queue[int('-2')] = os.path.basename(kvitanciya[0])
 		for i in doclist:
@@ -93,14 +91,11 @@ class main_sorter:
 				if i + 1 in all_keys:  # Если экомод, то проверяем есть ли протокол для файла
 					if queue[i + 1].startswith(
 							'Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
-						merged_file, is_paper_eco = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
-																'{0}\\{1}'.format(foldername, queue[i + 1]))
-						os.remove('{0}\\{1}'.format(foldername, queue[i]))
-						os.remove('{0}\\{1}'.format(foldername, queue[i + 1]))
+						merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
+												  '{0}\\{1}'.format(foldername, queue[i + 1]))
 						queue_files.append(merged_file)
 						numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
 						queue_num_files.append(numered_file)
-						self.num_protocols_eco[numered_file] = is_paper_eco
 						counter += 1
 				else:
 					if not queue[i].startswith('Protokol_proverki_fayla_'):
@@ -115,6 +110,7 @@ class main_sorter:
 			if os.path.exists(i):
 				os.replace(i, j)
 				self.num_pages[j] = check_num_pages(j)
+				self.num_protocols_eco[j] = int(self.num_pages[j][0] % 2 != 1)
 				self.files_for_print.append(j)
 		if self.config.save_stat == 'yes':
 			docnumber = os.path.basename(givenpath).split('_', 1)[0]
