@@ -45,9 +45,12 @@ def check_num_pages(path):
     """
     doc = pdfplumber.open(path)
     n_pages = len(doc.pages)
+    if n_pages == 0:
+        n_pages += 1
     doc.close()
     pages = n_pages
     papers = int(pages / 2 + 0.9)
+    print(pages, papers)
     return [pages, papers]
 
 
