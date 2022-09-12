@@ -32,10 +32,12 @@ os.startfile(glob.glob(application_path + '//*.jar')[0])
 config_name = 'config.ini'  # название файла конфигурации
 stats_name = 'statistics.xlsx'  # название файла статистики
 PDF_PRINT_NAME = 'PDFtoPrinter.exe'  # название файла программы для печати
+iconname = 'scales.ico'
 printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]  # список принтеров в системе
 statfile_path = os.path.join(application_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(application_path, config_name)  # полный путь файла конфигурации
 PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)  # полный путь программы для печати
+iconpath = os.path.join(application_path, iconname)
 config_paths = [config_path, PDF_PRINT_FILE]
 
 current_config = config_file(config_paths)
@@ -56,7 +58,7 @@ def main_drop(event):
     if path[-4:] != '.zip':
         msgnames = parse_names(event.data)
         msg_handler.handle_messages(msgnames)
-        msg_handler.print_dialog_msg(root, current_config)
+        msg_handler.print_dialog_msg(root, current_config, iconpath)
     else:
         sorterClass.agregate_file(path)
         if current_config.print_directly == "yes":
@@ -91,6 +93,7 @@ def apply(e=current_config):
 
 def show_settings(e):
     settings = Toplevel(root)
+    settings.iconbitmap(iconpath)
     settings.title("Параметры")
     Checkbutton(settings, text="Удалить Zip", variable=opt1DelZip, onvalue='yes', offvalue='no',
                 command=apply).pack(anchor=W)
@@ -122,6 +125,7 @@ def show_settings(e):
 
 def print_dialog():
     dialog = Toplevel(root)
+    dialog.iconbitmap(iconpath)
     dialog.title(f'Файлов на печать {len(sorterClass.files_for_print)}')
     dialog.attributes('-topmost', True)
     dialog.resizable(False, False)

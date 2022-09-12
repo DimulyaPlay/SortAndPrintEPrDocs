@@ -50,7 +50,6 @@ def check_num_pages(path):
     doc.close()
     pages = n_pages
     papers = int(pages / 2 + 0.9)
-    print(pages, papers)
     return [pages, papers]
 
 

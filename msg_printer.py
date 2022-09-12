@@ -95,7 +95,7 @@ class MessageHandler:
             self.handled_messages[outpath] = msg
             self.handled_attachments[outpath] = attachment_files
 
-    def print_dialog_msg(self, root, current_config):
+    def print_dialog_msg(self, root, current_config, iconpath):
         """
         Функция окна печати
         :param root: родительское окно
@@ -103,6 +103,7 @@ class MessageHandler:
         """
         dialog = Toplevel(root)
         dialog.title(f'Файлов на печать ')
+        dialog.iconbitmap(iconpath)
         dialog.attributes('-topmost', True)
         dialog.resizable(False, False)
 
