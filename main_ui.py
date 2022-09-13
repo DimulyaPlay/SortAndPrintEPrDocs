@@ -16,8 +16,8 @@ from stats_module import stat_loader
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
-ver = '1.0_4_JPrinterVer, 0.5_JavaUtils'
-curdate = '2022/09/9'
+ver = '1.0_5_JPrinterVer, 0.5_JavaUtils'
+curdate = '2022/09/13'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -85,6 +85,7 @@ def apply(e=current_config):
     current_config.default_printer = opt4DefPrinter.get()
     current_config.save_stat = opt5SaveStat.get()
     current_config.gui_opacity = opt6Opacity.get()
+    current_config.no_protocols = opt7noProtocols.get()
     if current_config.save_stat == 'yes':
         stat_writer = stat_loader(statfile_path)
     root.attributes('-alpha', (int(current_config.gui_opacity) / 100))
@@ -104,6 +105,8 @@ def show_settings(e):
     Checkbutton(settings, text="Печать на принтер", variable=opt3Print, onvalue='yes', offvalue='no',
                 command=apply).pack(anchor=W)
     Checkbutton(settings, text="Сохранять статистику", variable=opt5SaveStat, onvalue='yes', offvalue='no',
+                command=apply).pack(anchor=W)
+    Checkbutton(settings, text="Без протоколов", variable=opt7noProtocols, onvalue='yes', offvalue='no',
                 command=apply).pack(anchor=W)
     Scale(settings, from_=10, to=100, orient=HORIZONTAL, variable=opt6Opacity, command=apply).pack(anchor=W,
                                                                                                    fill=X)
@@ -319,4 +322,6 @@ opt5SaveStat = StringVar()
 opt5SaveStat.set(current_config.save_stat)
 opt6Opacity = StringVar()
 opt6Opacity.set(current_config.gui_opacity)
+opt7noProtocols = StringVar()
+opt7noProtocols.set(current_config.no_protocols)
 root.mainloop()

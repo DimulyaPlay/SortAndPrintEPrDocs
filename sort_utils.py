@@ -10,6 +10,7 @@ import pdfplumber
 import win32com
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from py4j.java_gateway import JavaGateway
+import py4j.java_collections
 
 gateway = JavaGateway()
 a4orig = [612.1, 842.0]  # оригинальный формат А4
