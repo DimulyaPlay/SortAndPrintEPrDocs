@@ -47,7 +47,13 @@ if current_config.save_stat == 'yes':
     sorterClass = main_sorter(current_config, stat=stat_writer)
 else:
     sorterClass = main_sorter(current_config)
-msg_handler = MessageHandler()
+try:
+    msg_handler = MessageHandler()
+    outlook_connected = True
+except:
+    messagebox.showwarning('Не удалось соединиться с Outlook. Работа только с ЭПр')
+    outlook_connected = False
+    pass
 
 
 def main_drop(event):
@@ -55,7 +61,7 @@ def main_drop(event):
         path = event.data[1:-1]
     else:
         path = event.data
-    if path[-4:] != '.zip':
+    if path[-4:] != '.zip' and outlook_connected:
         msgnames = parse_names(event.data)
         msg_handler.handle_messages(msgnames)
         msg_handler.print_dialog_msg(root, current_config, iconpath)
