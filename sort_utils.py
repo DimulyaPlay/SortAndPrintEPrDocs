@@ -77,7 +77,7 @@ def concat_pdfs(master, wingman):
 
     :param wingman: путь ко второму пдф
 
-    :return: str путь к обьединенному пдф, bool сохранен ли лист
+    :return: str путь к обьединенному пдф
     """
     out = gateway.entry_point.concatenateTwoPdfs(master, wingman)
     return out
@@ -248,7 +248,7 @@ def fourUP(filepath):
             big_page.mergeScaledTranslatedPage(orig_file.pages[i + 3], scale=0.48, tx=283, ty=10)
         except:
             pass
-    merged_file.addPage(big_page)
+        merged_file.addPage(big_page)
     fd, outpath = tempfile.mkstemp('.pdf')
     os.close(fd)
     with open(outpath, 'wb') as out:
