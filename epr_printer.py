@@ -42,7 +42,7 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         open_folder_b.unbind("<Button-1>")
         open_folder_b.config(relief=SUNKEN)
         open_folder_b.update()
-        subprocess.Popen(f'explorer {os.path.dirname(filepathsForPrint[0])}')
+        os.startfile(os.path.dirname(filepathsForPrint[0]))
         time.sleep(0.1)
         open_folder_b.config(relief=RAISED)
         open_folder_b.update()

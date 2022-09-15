@@ -1,6 +1,11 @@
 from tkinter import *
 import win32print
 
+# ver = '3.4.4'
+# ver = '1.0.10_TRON'
+ver = '1.0_5_JPrinterVer, 0.5_JavaUtils'
+curdate = '2022/09/15'
+
 
 def open_settings(root, current_config, statfile_path, iconpath, stat_loader):
     printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]  # список принтеров в системе

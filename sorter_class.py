@@ -2,7 +2,6 @@ import random
 from datetime import datetime
 from zipfile import ZipFile
 from sort_utils import *
-import subprocess
 
 
 class main_sorter:
@@ -125,4 +124,4 @@ class main_sorter:
             self.stat.statdict['Кол-во страниц в документах'] = (sum(i[0] for i in self.num_pages.values()))
             self.stat.statdict['Кол-во листов в документах'] = (sum(i[1] for i in self.num_pages.values()))
         if self.config.print_directly == 'no':
-            subprocess.Popen(f'explorer {foldername}')
+            os.startfile(foldername)

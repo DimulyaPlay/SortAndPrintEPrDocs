@@ -98,6 +98,7 @@ class MessageHandler:
     def print_dialog_msg(self, root, current_config, iconpath):
         """
         Функция окна печати
+        :param iconpath: путь к иконке окна
         :param root: родительское окно
         :param current_config: конфигурация
         """

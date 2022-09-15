@@ -4,10 +4,8 @@ import sys
 from functools import partial
 from tkinter import *
 from tkinter import messagebox
-
 import win32print
 from tkinterdnd2 import *
-
 from config_loader import config_file
 from msg_printer import MessageHandler
 from epr_printer import print_dialog
@@ -15,11 +13,6 @@ from options import open_settings
 from scrollable_frame import VerticalScrolledFrame
 from sorter_class import *
 from stats_module import stat_loader
-
-# ver = '3.4.4'
-# ver = '1.0.10_TRON'
-ver = '1.0_5_JPrinterVer, 0.5_JavaUtils'
-curdate = '2022/09/15'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
@@ -49,11 +42,11 @@ if current_config.save_stat == 'yes':
     sorterClass = main_sorter(current_config, stat=stat_writer)
 else:
     sorterClass = main_sorter(current_config)
+
 try:
     msg_handler = MessageHandler()
     outlook_connected = True
 except:
-    messagebox.showwarning("Ошибка", 'Не удалось соединиться с Outlook. Работа только с ЭПр')
     outlook_connected = False
     pass
 
@@ -63,10 +56,13 @@ def main_drop(event):
         path = event.data[1:-1]
     else:
         path = event.data
-    if path[-4:] != '.zip' and outlook_connected:
-        msgnames = parse_names(event.data)
-        msg_handler.handle_messages(msgnames)
-        msg_handler.print_dialog_msg(root, current_config, iconpath)
+    if path[-4:] != '.zip':
+        if not outlook_connected:
+            messagebox.showwarning("Ошибка", 'Не удалось соединиться с Outlook. Работа только с ЭПр')
+        else:
+            msgnames = parse_names(event.data)
+            msg_handler.handle_messages(msgnames)
+            msg_handler.print_dialog_msg(root, current_config, iconpath)
     else:
         sorterClass.agregate_file(path)
         if current_config.print_directly == "yes":
