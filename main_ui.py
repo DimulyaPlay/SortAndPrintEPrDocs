@@ -19,7 +19,7 @@ from stats_module import stat_loader
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
 ver = '1.0_5_JPrinterVer, 0.5_JavaUtils'
-curdate = '2022/09/13'
+curdate = '2022/09/15'
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
