@@ -83,10 +83,11 @@ def concat_pdfs(master, wingman):
     return out
 
 
-def print_file(filepath, mode, currentprinter, n_pages, fileName='Empty'):
+def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'):
     """
     Отправка документа в очередь печати с заданными параметрами
 
+    :param copies: копий
     :param n_pages: количество страниц в пдф
     :param fileName: имя, которое сохранится в логе spooler
     :param filepath: путь к файлу

@@ -43,9 +43,10 @@ class main_sorter:
         [os.remove(i) for i in siglist]
         abspathlist = glob.glob(foldername + os.sep + "*")
         basedoclist = []
+        num_appeal = os.path.basename(givenpath).split('_all_files.zip')[0]
         for i in abspathlist:
-            if not os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[') and not os.path.basename(i).startswith(
-                    'Protokol_proverki_fayla_'):
+            if not os.path.basename(i).startswith(f'Kvitantsiya_ob_otpravke[{num_appeal}]') and not os.path.basename(
+                    i).startswith('Protokol_proverki_fayla_'):
                 basedoclist.append(i)
         doclist = [office2pdf(i) if i.endswith(('.doc', '.docx', '.rtf', '.odt', '.ods', '.xls', '.xlsx')) else i for i
                    in basedoclist]
@@ -53,7 +54,8 @@ class main_sorter:
         protlist = [i for i in abspathlist if os.path.basename(i).startswith('Protokol_proverki_fayla_')]
         if self.config.no_protocols == 'yes':
             protlist = []
-        kvitanciya = [i for i in abspathlist if os.path.basename(i).startswith('Kvitantsiya_ob_otpravke[')]
+        kvitanciya = [i for i in abspathlist if
+                      os.path.basename(i).startswith(f'Kvitantsiya_ob_otpravke[{num_appeal}]')]
         if not kvitanciya:
             return
         doc_list = extracttext(kvitanciya[0])

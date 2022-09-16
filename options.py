@@ -3,8 +3,8 @@ import win32print
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
-ver = '1.0_5_JPrinterVer, 0.5_JavaUtils'
-curdate = '2022/09/15'
+ver = '1.0_6_JPrinterVer, 0.5_JavaUtils'
+curdate = '2022/09/16'
 
 
 def open_settings(root, current_config, statfile_path, iconpath, stat_loader):
@@ -55,7 +55,7 @@ def open_settings(root, current_config, statfile_path, iconpath, stat_loader):
                 command=apply).pack(anchor=W)
     Scale(settings, from_=10, to=100, orient=HORIZONTAL, variable=opt6Opacity, command=apply).pack(anchor=W,
                                                                                                    fill=X)
-    Label(settings, text='Прозрачность интерфейса').pack(anchor=W, fill=X, pady=5)
+    Label(settings, text='Непрозрачность интерфейса').pack(anchor=W, fill=X, pady=5)
     OptionMenu(settings, opt4DefPrinter, *printer_list, command=apply).pack(anchor=W)
     showcredits = Label(settings, text="  Автор  ", borderwidth=2, relief="groove")
     showcredits.pack(anchor=S, padx=2, pady=2, fill=X)

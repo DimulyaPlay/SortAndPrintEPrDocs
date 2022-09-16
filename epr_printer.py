@@ -20,7 +20,7 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
             if prntcbvar.get():
                 to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
                                            int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
-                                           os.path.basename(fp))
+                                           entryCopyVariables[fp].get(), os.path.basename(fp))
                 stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
                 prntcbvar.set(0)
                 lb1[fp].config(background='green1')
@@ -79,11 +79,12 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
 
     container = VerticalScrolledFrame(dialog, height=550 if len(sorterClass.files_for_print) > 20 else (
                                                                                                                len(sorterClass.files_for_print) + 1) * 25,
-                                      width=645)
+                                      width=675)
     container.pack()
     filepathsForPrint = sorterClass.files_for_print
     printcbVariables = {}
     rbVariables = {}
+    entryCopyVariables = {}
     lb1 = {}
     prntchballvar = BooleanVar()
     prntchballvar.set(1)
@@ -94,6 +95,7 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
     Label(container, text='1').grid(column=3, row=0)
     Label(container, text='2').grid(column=4, row=0)
     Label(container, text='4').grid(column=5, row=0)
+    Label(container, text='Коп').grid(column=6, row=0)
     current_row = 1
     for fp in filepathsForPrint:
         fn = os.path.basename(fp)
@@ -115,6 +117,10 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         rb2.grid(column=4, row=current_row, sticky=W)
         rb4 = Radiobutton(container, variable=rbVariables[fp], value=4, command=update_num_pages)
         rb4.grid(column=5, row=current_row, sticky=W)
+        entryCopyVariables[fp] = IntVar()
+        entryCopyVariables[fp].set(1)
+        entryCopies = Entry(container, textvariable=entryCopyVariables[fp], width=5)
+        entryCopies.grid(column=6, row=current_row, sticky=W)
         current_row += 1
     bottom_actions = Frame(dialog)
     bottom_actions.pack()

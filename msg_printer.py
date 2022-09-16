@@ -147,7 +147,8 @@ class MessageHandler:
                         continue
                     if printcbVariables[att[0]].get():
                         print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
-                                   int(att[2] / rbVariables[att[0]].get()), att[1])
+                                   int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[current_key].get(),
+                                   att[1])
                         printcbVariables[att[0]].set(0)
                         lb1[att[0]].config(background='green1')
                         lb1[att[0]].update()
@@ -184,12 +185,13 @@ class MessageHandler:
             width = 26
         if width > 68:
             width = 68
-        width = (width * 8) + 185
+        width = (width * 8) + 215
         if height > MAXHEIGHT:
             height = MAXHEIGHT
         container = VerticalScrolledFrame(dialog, height=height, width=width)
         container.pack()
         rbVariables = {}
+        entryCopyVariables = {}
         lb1 = {}
         printcbVariables = {}
         prntchballvar = BooleanVar()
@@ -201,8 +203,8 @@ class MessageHandler:
         Label(container, text='1').grid(column=3, row=0)
         Label(container, text='2').grid(column=4, row=0)
         Label(container, text='4').grid(column=5, row=0)
+        Label(container, text='Коп').grid(column=6, row=0)
         currentrow = 1
-
         for filepath in self.handle_keys:
             subject = self.handled_messages[filepath].subject if self.handled_messages[
                                                                      filepath].subject != '' else 'Пустая тема'
@@ -215,6 +217,10 @@ class MessageHandler:
             lb1[filepath] = Label(container, text=subject, font='TkFixedFont', fg='blue')
             lb1[filepath].grid(column=1, row=currentrow, sticky=W)
             lb1[filepath].bind('<Double-Button-1>', lambda event, a=self.orig_messages[filepath]: os.startfile(a))
+            entryCopyVariables[filepath] = IntVar()
+            entryCopyVariables[filepath].set(1)
+            entryCopies = Entry(container, textvariable=entryCopyVariables[filepath], width=5)
+            entryCopies.grid(column=6, row=currentrow, sticky=W)
             currentrow += 1
             for att in self.handled_attachments[filepath]:
                 current_key = att[0]
@@ -249,6 +255,10 @@ class MessageHandler:
                 rb4 = Radiobutton(container, variable=rbVariables[current_key], value=4, command=update_num_pages)
                 rb4.var = rbVariables[current_key]
                 rb4.grid(column=5, row=currentrow, sticky=W)
+                entryCopyVariables[current_key] = IntVar()
+                entryCopyVariables[current_key].set(1)
+                entryCopies = Entry(container, textvariable=entryCopyVariables[current_key], width=5)
+                entryCopies.grid(column=6, row=currentrow, sticky=W)
                 currentrow += 1
         bottom_actions = Frame(dialog)
         bottom_actions.pack()

@@ -22,8 +22,6 @@ try:
     os.startfile(glob.glob(application_path + '//*.jar')[0])
 except IndexError as e:
     raise IndexError('Не обнаружен файл для печати с расширением .jar') from e
-
-os.startfile(glob.glob(application_path + '//*.jar')[0])
 config_name = 'config.ini'  # название файла конфигурации
 stats_name = 'statistics.xlsx'  # название файла статистики
 PDF_PRINT_NAME = 'PDFtoPrinter.exe'  # название файла программы для печати
