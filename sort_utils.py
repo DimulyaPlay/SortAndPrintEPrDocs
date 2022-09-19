@@ -3,9 +3,10 @@ import os
 import tempfile
 import time
 from difflib import SequenceMatcher
-
+import zipfile
+import rarfile
+import py7zr
 import PyPDF2
-import patoolib
 import pdfplumber
 import win32com
 from PyPDF2 import PdfFileReader, PdfFileWriter
@@ -110,8 +111,9 @@ def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'
         filepaths = splitBy10(filepath, n_pages)
     else:
         filepaths = [filepath]
-    for filepath in filepaths:
-        gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
+    for i in range(copies):
+        for filepath in filepaths:
+            gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
     deltatime = time.time() - starttime
     return deltatime
 
@@ -135,23 +137,45 @@ def parse_names(names: str):
     return nameslist
 
 
-def unpack_archieved_files(path):
+def unpack_archieved_files(path, ext):
     """
     Рекурсивная распаковка архивов
 
+    :param ext: расширение файла
     :param path: путь к архиву
-
     :return: список путей к распакованным файлам, список названий файлов
     """
     tempdir = tempfile.mkdtemp()
     total_files = []
     total_names = []
-    patoolib.extract_archive(path, outdir=tempdir)
+
+    if ext == '.zip':
+        zf = zipfile.ZipFile(path)
+        try:
+            zf.testzip()
+        except:
+            return [path], [os.path.basename(path) + '.lockedArchive']
+        zf.extractall(tempdir)
+
+    if ext == '.rar':
+        rf = rarfile.RarFile(path)
+        try:
+            rf.testrar()
+        except:
+            return [path], [os.path.basename(path) + '.lockedArchive']
+        rf.extractall(tempdir)
+    if ext == '.7z':
+        z7f = py7zr.SevenZipFile(path)
+        if z7f.password_protected:
+            return [path], [os.path.basename(path) + '.lockedArchive']
+        z7f.extractall(tempdir)
+
+    # patoolib.extract_archive(path, outdir=tempdir)
     extracted_files = glob.glob(tempdir + '/**/*', recursive=True)
     total_files.extend(extracted_files)
     for ex_file in extracted_files:
-        if ex_file.lower().endswith(('.zip', '7z', 'rar')):
-            files, names = unpack_archieved_files(ex_file)
+        if ex_file.lower().endswith(('.zip', '.7z', '.rar')):
+            files, names = unpack_archieved_files(ex_file, '.' + ex_file.rsplit('.')[1])
             total_files.extend(files)
     total_names = [os.path.basename(i) for i in total_files]
     return total_files, total_names

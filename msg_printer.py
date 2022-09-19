@@ -38,7 +38,7 @@ class MessageHandler:
             filename = att.FileName
             outpath, ext = self.get_file_from_attach(att)
             if ext in self.allowed_ext_archives:
-                filepaths, filenames = unpack_archieved_files(outpath)
+                filepaths, filenames = unpack_archieved_files(outpath, ext)
                 for fp, fn in zip(filepaths, filenames):
                     if not os.path.isdir(fp):
                         list_files.append([fp, fn])
@@ -136,7 +136,8 @@ class MessageHandler:
             print_button.update()
             for msg in self.handle_keys:
                 if printcbVariables[msg].get():
-                    self.handled_messages[msg].PrintOut()
+                    for i in range(entryCopyVariables[msg].get()):  # кол-во копий печатать
+                        self.handled_messages[msg].PrintOut()
                     printcbVariables[msg].set(False)
                     lb1[msg].config(background='green1')
                     lb1[msg].update()
