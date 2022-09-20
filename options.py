@@ -1,13 +1,14 @@
 from tkinter import *
 import win32print
+import os
 
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
 ver = '1.0_6_JPrinterVer, 0.5_JavaUtils'
-curdate = '2022/09/16'
+curdate = '2022/09/19'
 
 
-def open_settings(root, current_config, statfile_path, iconpath, stat_loader):
+def open_settings(root, current_config, statfile_path, iconpath, stat_loader, config_path):
     printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]  # список принтеров в системе
     opt1DelZip = StringVar()
     opt1DelZip.set(current_config.deletezip)

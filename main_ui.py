@@ -80,7 +80,7 @@ def quitter(e):
 
 
 def show_settings(e):
-    open_settings(root, current_config, statfile_path, iconpath, stat_loader)
+    open_settings(root, current_config, statfile_path, iconpath, stat_loader, config_path)
 
 
 def color_config_enter(widget, color, event):

@@ -148,7 +148,7 @@ class MessageHandler:
                         continue
                     if printcbVariables[att[0]].get():
                         print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
-                                   int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[current_key].get(),
+                                   int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[att[0]].get(),
                                    att[1])
                         printcbVariables[att[0]].set(0)
                         lb1[att[0]].config(background='green1')

@@ -43,7 +43,7 @@ class main_sorter:
         [os.remove(i) for i in siglist]
         abspathlist = glob.glob(foldername + os.sep + "*")
         basedoclist = []
-        num_appeal = os.path.basename(givenpath).split('_all_files.zip')[0]
+        num_appeal = os.path.basename(givenpath).split('_all_files')[0]
         for i in abspathlist:
             if not os.path.basename(i).startswith(f'Kvitantsiya_ob_otpravke[{num_appeal}]') and not os.path.basename(
                     i).startswith('Protokol_proverki_fayla_'):
