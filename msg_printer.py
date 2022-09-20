@@ -239,7 +239,6 @@ class MessageHandler:
                 else:
                     prntchb = Checkbutton(container, state=DISABLED)
                 prntchb.grid(column=0, row=currentrow, sticky=W, padx=padx / 2)
-
                 lb1[current_key] = Label(container, text=current_name, font='TkFixedFont')
                 lb1[current_key].grid(column=1, row=currentrow, sticky=W, padx=padx)
                 lb1[current_key].bind('<Double-Button-1>', lambda event, a=current_key: os.startfile(a))
