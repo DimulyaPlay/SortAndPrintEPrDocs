@@ -16,15 +16,25 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         print_button.config(relief=SUNKEN)
         print_button.update()
         stat_writer.statdict['Постановка в очередь заняла'] = 0
-        for fp, prntcbvar in printcbVariables.items():
-            if prntcbvar.get():
-                to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
-                                           int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
-                                           entryCopyVariables[fp].get(), os.path.basename(fp))
-                stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
-                prntcbvar.set(0)
-                lb1[fp].config(background='green1')
-                lb1[fp].update()
+        colors = ['darkviolet', 'blue', 'teal', 'aquamarine', 'orangered', 'deepskyblue', 'gold', 'deeppink', 'crimson',
+                  'peru', 'red', 'green1']
+        if entryCopyVariable.get() > 12:
+            entryCopyVariable.set(12)
+        for i in range(entryCopyVariable.get()):
+            for fp, prntcbvar in printcbVariables.items():
+                if prntcbvar.get():
+                    to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
+                                               int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
+                                               entryCopyVariables[fp].get(), os.path.basename(fp))
+                    stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
+                    if i + 1 == entryCopyVariable.get():
+                        prntcbvar.set(0)
+                        lb1[fp].config(background=colors[-1])
+                        lb1[fp].update()
+                    else:
+                        lb1[fp].config(background=colors[i])
+                        lb1[fp].update()
+
         if current_config.save_stat == 'yes' and statsaver.get():
             stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
             stat_writer.statdict[
@@ -32,7 +42,8 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
             stat_writer.statdict['Затрачено листов'] = eco_dupl_len_for_print_var.get()
             stat_writer.statdict[
                 'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
-            stat_writer.add_and_save_stats()
+            for i in range(entryCopyVariable.get()):
+                stat_writer.add_and_save_stats()
         update_num_pages()
         print_button.config(relief=RAISED)
         print_button.bind("<Button-1>", apply_print)
@@ -144,3 +155,9 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
     print_button.bind("<Button-1>", apply_print)
     sum_pages = Label(bottom_actions, textvariable=len_pages)
     sum_pages.grid(column=3, row=0, sticky=S, padx=5, pady=2)
+    n_copies = Label(bottom_actions, text="Копий:")
+    n_copies.grid(column=4, row=0, sticky=S, padx=5, pady=2)
+    entryCopyVariable = IntVar()
+    entryCopyVariable.set(1)
+    entryCopiesAll = Entry(bottom_actions, textvariable=entryCopyVariable, width=5)
+    entryCopiesAll.grid(column=7, row=0, sticky=W)

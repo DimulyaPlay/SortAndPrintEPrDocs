@@ -6,12 +6,11 @@ import win32print
 
 
 class config_file:
-    def __init__(self, config_filepaths):
-        self.config_path = config_filepaths[0]
+    def __init__(self, config_filepath):
+        self.config_path = config_filepath
         self.default_config = {'no_protocols': 'no', 'delete_zip': 'no', 'paper_eco_mode': 'yes',
                                'print_directly': 'yes', 'save_stat': 'yes',
-                               'default_printer': win32print.GetDefaultPrinter(), 'PDF_PRINT_PATH': config_filepaths[1],
-                               'opacity': 60}
+                               'default_printer': win32print.GetDefaultPrinter(), 'opacity': 60}
         self.readcreateconfig()
         try:
             self.read_vars_from_config()
@@ -54,6 +53,5 @@ class config_file:
         self.save_stat = self.current_config.get('DEFAULT', 'save_stat')  # Сохранение статистики в файл
         self.default_printer = self.current_config.get('DEFAULT',
                                                        'default_printer')  # Принтер по умолчанию для программы
-        self.PDF_PRINT_FILE = self.current_config.get('DEFAULT', 'PDF_PRINT_PATH')  # Путь для программы PDFPrint
         self.gui_opacity = self.current_config.get('DEFAULT', "opacity")  # Прозрачность основного окна
         self.no_protocols = self.current_config.get('DEFAULT', 'no_protocols')

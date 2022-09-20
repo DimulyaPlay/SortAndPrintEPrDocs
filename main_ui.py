@@ -25,16 +25,13 @@ except IndexError as e:
 documents_path = os.path.expanduser('~/Documents')
 config_name = 'EPr_print_config.ini'  # название файла конфигурации
 stats_name = 'EPr_print_statistics.xlsx'  # название файла статистики
-PDF_PRINT_NAME = 'PDFtoPrinter.exe'  # название файла программы для печати
 iconname = 'scales.ico'
 printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_NAME)]  # список принтеров в системе
 statfile_path = os.path.join(documents_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(documents_path, config_name)  # полный путь файла конфигурации
-PDF_PRINT_FILE = os.path.join(application_path, PDF_PRINT_NAME)  # полный путь программы для печати
 iconpath = os.path.join(application_path, iconname)
-config_paths = [config_path, PDF_PRINT_FILE]
 
-current_config = config_file(config_paths)
+current_config = config_file(config_path)
 
 if current_config.save_stat == 'yes':
     stat_writer = stat_loader(statfile_path)
