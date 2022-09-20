@@ -25,7 +25,6 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
                 prntcbvar.set(0)
                 lb1[fp].config(background='green1')
                 lb1[fp].update()
-                update_num_pages()
         if current_config.save_stat == 'yes' and statsaver.get():
             stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
             stat_writer.statdict[
@@ -34,7 +33,7 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
             stat_writer.statdict[
                 'Сэкономлено листов'] = full_dupl_len_for_print_var.get() - eco_dupl_len_for_print_var.get() + eco_protocols_var.get()
             stat_writer.add_and_save_stats()
-            print('saved to stats')
+        update_num_pages()
         print_button.config(relief=RAISED)
         print_button.bind("<Button-1>", apply_print)
 
