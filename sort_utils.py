@@ -71,16 +71,17 @@ def splitBy10(filepath, n_pages):
     return filepaths
 
 
-def concat_pdfs(master, wingman):
+def concat_pdfs(list_of_filepaths):
     """
     Конкатенация пдф файлов
-    :param master: путь к первому пдф
-
-    :param wingman: путь ко второму пдф
 
     :return: str путь к обьединенному пдф
     """
-    out = gateway.entry_point.concatenateTwoPdfs(master, wingman)
+    object_class = gateway.jvm.java.lang.String
+    MyJavaArray = gateway.new_array(object_class, len(list_of_filepaths))
+    for i in range(len(list_of_filepaths)):
+        MyJavaArray[i] = list_of_filepaths[i]
+    out = gateway.entry_point.concatenatePdfs(MyJavaArray)
     return out
 
 

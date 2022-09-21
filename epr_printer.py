@@ -1,7 +1,6 @@
 from tkinter import *
 from scrollable_frame import VerticalScrolledFrame
 from sort_utils import *
-import subprocess
 
 
 def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):

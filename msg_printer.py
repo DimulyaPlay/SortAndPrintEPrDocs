@@ -134,6 +134,7 @@ class MessageHandler:
             print_button.unbind("<Button-1>")
             print_button.config(relief=SUNKEN)
             print_button.update()
+            temp_group_print_files_list = []
             for msg in self.handle_keys:
                 if printcbVariables[msg].get():
                     for i in range(entryCopyVariables[msg].get()):  # кол-во копий печатать
@@ -147,9 +148,18 @@ class MessageHandler:
                     except:
                         continue
                     if printcbVariables[att[0]].get():
-                        print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
-                                   int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[att[0]].get(),
-                                   att[1])
+                        if att[0] in group_print_list:
+                            temp_group_print_files_list.append(att[0])
+                            group_print_list.remove(att[0])
+                            if not group_print_list:
+                                groupped_file = concat_pdfs(temp_group_print_files_list)
+                                print_file(groupped_file, rbVariables[att[0]].get(), current_config.default_printer,
+                                           int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[att[0]].get(),
+                                           att[1])
+                        else:
+                            print_file(att[0], rbVariables[att[0]].get(), current_config.default_printer,
+                                       int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[att[0]].get(),
+                                       att[1])
                         printcbVariables[att[0]].set(0)
                         lb1[att[0]].config(background='green1')
                         lb1[att[0]].update()
@@ -165,6 +175,16 @@ class MessageHandler:
                 for chbtn in printcbVariables.values():
                     chbtn.set(0)
             update_num_pages()
+
+        def change_concat_category(e):
+            widget = e.widget
+            widget.config(background='blue')
+            widget.update()
+            keys = list(lb1.keys())
+            values = list(lb1.values())
+            found_index = values.index(widget)
+            doc_for_concat = keys[found_index]
+            group_print_list.append(doc_for_concat)
 
         MAXHEIGHT = 650
         height = 1
@@ -195,6 +215,7 @@ class MessageHandler:
         entryCopyVariables = {}
         lb1 = {}
         printcbVariables = {}
+        group_print_list = []
         prntchballvar = BooleanVar()
         prntchballvar.set(1)
         prntchball = Checkbutton(container, variable=prntchballvar, command=check_all_chbtns)
@@ -242,6 +263,7 @@ class MessageHandler:
                 lb1[current_key] = Label(container, text=current_name, font='TkFixedFont')
                 lb1[current_key].grid(column=1, row=currentrow, sticky=W, padx=padx)
                 lb1[current_key].bind('<Double-Button-1>', lambda event, a=current_key: os.startfile(a))
+                lb1[current_key].bind('<Button-3>', change_concat_category)
                 lb2 = Label(container, text=current_pages)
                 lb2.grid(column=2, row=currentrow, sticky=W, padx=padx)
                 rbVariables[current_key] = IntVar()

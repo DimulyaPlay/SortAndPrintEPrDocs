@@ -95,8 +95,8 @@ class main_sorter:
                 if i + 1 in all_keys:  # Если экомод, то проверяем есть ли протокол для файла
                     if queue[i + 1].startswith(
                             'Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
-                        merged_file = concat_pdfs('{0}\\{1}'.format(foldername, queue[i]),
-                                                  '{0}\\{1}'.format(foldername, queue[i + 1]))
+                        merged_file = concat_pdfs(['{0}\\{1}'.format(foldername, queue[i]),
+                                                   '{0}\\{1}'.format(foldername, queue[i + 1])])
                         queue_files.append(merged_file)
                         numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
                         queue_num_files.append(numered_file)
