@@ -134,7 +134,7 @@ class MessageHandler:
             print_button.unbind("<Button-1>")
             print_button.config(relief=SUNKEN)
             print_button.update()
-            temp_group_print_files_list = []
+            group_print_list_sorted = group_print_list.copy()
             for msg in self.handle_keys:
                 if printcbVariables[msg].get():
                     for i in range(entryCopyVariables[msg].get()):  # кол-во копий печатать
@@ -149,10 +149,9 @@ class MessageHandler:
                         continue
                     if printcbVariables[att[0]].get():
                         if att[0] in group_print_list:
-                            temp_group_print_files_list.append(att[0])
                             group_print_list.remove(att[0])
                             if not group_print_list:
-                                groupped_file = concat_pdfs(temp_group_print_files_list)
+                                groupped_file = concat_pdfs(group_print_list_sorted, False)
                                 print_file(groupped_file, rbVariables[att[0]].get(), current_config.default_printer,
                                            int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[att[0]].get(),
                                            att[1])
@@ -178,13 +177,18 @@ class MessageHandler:
 
         def change_concat_category(e):
             widget = e.widget
-            widget.config(background='blue')
-            widget.update()
             keys = list(lb1.keys())
             values = list(lb1.values())
             found_index = values.index(widget)
             doc_for_concat = keys[found_index]
+            if doc_for_concat in group_print_list:
+                group_print_list.remove(doc_for_concat)
+                widget.config(background='SystemButtonFace')
+                widget.update()
+                return
             group_print_list.append(doc_for_concat)
+            widget.config(background='orange')
+            widget.update()
 
         MAXHEIGHT = 650
         height = 1

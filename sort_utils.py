@@ -71,7 +71,7 @@ def splitBy10(filepath, n_pages):
     return filepaths
 
 
-def concat_pdfs(list_of_filepaths):
+def concat_pdfs(list_of_filepaths, is_del):
     """
     Конкатенация пдф файлов
 
@@ -81,7 +81,7 @@ def concat_pdfs(list_of_filepaths):
     MyJavaArray = gateway.new_array(object_class, len(list_of_filepaths))
     for i in range(len(list_of_filepaths)):
         MyJavaArray[i] = list_of_filepaths[i]
-    out = gateway.entry_point.concatenatePdfs(MyJavaArray)
+    out = gateway.entry_point.concatenatePdfs(MyJavaArray, bool(is_del))
     return out
 
 
