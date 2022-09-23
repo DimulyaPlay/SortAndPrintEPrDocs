@@ -37,6 +37,9 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
                     else:
                         lb1[fp].config(background=colors[i])
                         lb1[fp].update()
+                    if to_queue_time == 0:
+                        lb1[fp].config(background='red')
+                        lb1[fp].update()
 
         if current_config.save_stat == 'yes' and statsaver.get():
             stat_writer.statdict['Напечатано док-ов'] = num_docs_for_print.get()
@@ -130,7 +133,7 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         rb2.grid(column=4, row=current_row, sticky=W)
         rb4 = Radiobutton(container, variable=rbVariables[fp], value=4, command=update_num_pages)
         rb4.grid(column=5, row=current_row, sticky=W)
-        entryCopyVariables[fp] = IntVar()
+        entryCopyVariables[fp] = StringVar()
         entryCopyVariables[fp].set(1)
         entryCopies = Entry(container, textvariable=entryCopyVariables[fp], width=5)
         entryCopies.grid(column=6, row=current_row, sticky=W)

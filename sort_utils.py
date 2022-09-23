@@ -96,7 +96,8 @@ def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'
     :param mode: расположение страниц на листе
     :param currentprinter: название принтера
     """
-
+    if not filepath.endswith('.pdf'):
+        return 0
     if mode == 1:
         try:
             filepath = fitPdfInA4(filepath)
@@ -296,22 +297,32 @@ def office2pdf(origfile):
     convfile = f'{origfile}.pdf'
     wordext = ['.odt', '.rtf', '.doc', '.docx']
     excelext = ['.ods', '.xls', '.xlsx']
-    if ext in wordext:
-        word = win32com.client.Dispatch('Word.Application')
-        doc = word.Documents.Open(origfile)
-        doc.SaveAs(convfile, FileFormat=17)
-        doc.Close()
-        doc = None
-        word.Quit()
-        word = None
-    if ext in excelext:
-        excel = win32com.client.Dispatch("Excel.Application")
-        book = excel.Workbooks.Open(Filename=origfile)
-        book.ExportAsFixedFormat(0, convfile)
-        book = None
-        excel.Quit()
-        excel = None
-    os.remove(origfile)
+    try:
+        if ext in wordext:
+            word = win32com.client.Dispatch('Word.Application')
+            doc = word.Documents.Open(origfile)
+            doc.SaveAs(convfile, FileFormat=17)
+            doc.Close()
+            doc = None
+            word.Quit()
+            word = None
+        if ext in excelext:
+            excel = win32com.client.Dispatch("Excel.Application")
+            book = excel.Workbooks.Open(Filename=origfile)
+            book.ExportAsFixedFormat(0, convfile)
+            book = None
+            excel.Quit()
+            excel = None
+    except Exception as e:
+        print(e)
+        print('cant convert office file ', origfile)
+        return origfile
+
+    try:
+        os.remove(origfile)
+    except:
+        print('cant remove ', origfile)
+        pass
     neworigfile = f'{origfile.rsplit(".", 1)[0]}.pdf'
     try:
         os.rename(convfile, neworigfile)
