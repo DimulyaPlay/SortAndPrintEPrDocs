@@ -5,7 +5,7 @@ import os
 # ver = '3.4.4'
 # ver = '1.0.10_TRON'
 ver = '1.0_7_JPrinterVer, 0.6_JavaUtils'
-curdate = '2022/09/21'
+curdate = '2022/09/22'
 
 
 def open_settings(root, current_config, statfile_path, iconpath, stat_loader, config_path):

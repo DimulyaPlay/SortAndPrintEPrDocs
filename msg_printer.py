@@ -137,7 +137,11 @@ class MessageHandler:
             group_print_list_sorted = group_print_list.copy()
             for msg in self.handle_keys:
                 if printcbVariables[msg].get():
-                    for i in range(entryCopyVariables[msg].get()):  # кол-во копий печатать
+                    try:
+                        copies = int(entryCopyVariables[msg].get())
+                    except:
+                        copies = 1
+                    for i in range(copies):  # кол-во копий печатать
                         self.handled_messages[msg].PrintOut()
                     printcbVariables[msg].set(False)
                     lb1[msg].config(background='green1')
@@ -243,7 +247,7 @@ class MessageHandler:
             lb1[filepath] = Label(container, text=subject, font='TkFixedFont', fg='blue')
             lb1[filepath].grid(column=1, row=currentrow, sticky=W)
             lb1[filepath].bind('<Double-Button-1>', lambda event, a=self.orig_messages[filepath]: os.startfile(a))
-            entryCopyVariables[filepath] = IntVar()
+            entryCopyVariables[filepath] = StringVar()
             entryCopyVariables[filepath].set(1)
             entryCopies = Entry(container, textvariable=entryCopyVariables[filepath], width=5)
             entryCopies.grid(column=6, row=currentrow, sticky=W)
@@ -281,7 +285,7 @@ class MessageHandler:
                 rb4 = Radiobutton(container, variable=rbVariables[current_key], value=4, command=update_num_pages)
                 rb4.var = rbVariables[current_key]
                 rb4.grid(column=5, row=currentrow, sticky=W)
-                entryCopyVariables[current_key] = IntVar()
+                entryCopyVariables[current_key] = StringVar()
                 entryCopyVariables[current_key].set(1)
                 entryCopies = Entry(container, textvariable=entryCopyVariables[current_key], width=5)
                 entryCopies.grid(column=6, row=currentrow, sticky=W)

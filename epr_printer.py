@@ -17,16 +17,20 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         stat_writer.statdict['Постановка в очередь заняла'] = 0
         colors = ['darkviolet', 'blue', 'teal', 'aquamarine', 'orangered', 'deepskyblue', 'gold', 'deeppink', 'crimson',
                   'peru', 'red', 'green1']
-        if entryCopyVariable.get() > 12:
-            entryCopyVariable.set(12)
-        for i in range(entryCopyVariable.get()):
+        try:
+            copies = int(entryCopyVariable.get())
+        except:
+            copies = 1
+        if copies > 12:
+            copies = 12
+        for i in range(copies):
             for fp, prntcbvar in printcbVariables.items():
                 if prntcbvar.get():
                     to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
                                                int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
                                                entryCopyVariables[fp].get(), os.path.basename(fp))
                     stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
-                    if i + 1 == entryCopyVariable.get():
+                    if i + 1 == copies:
                         prntcbvar.set(0)
                         lb1[fp].config(background=colors[-1])
                         lb1[fp].update()

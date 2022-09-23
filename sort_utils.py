@@ -112,6 +112,10 @@ def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'
         filepaths = splitBy10(filepath, n_pages)
     else:
         filepaths = [filepath]
+    try:
+        copies = int(copies)
+    except:
+        copies = 1
     for i in range(copies):
         for filepath in filepaths:
             gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
