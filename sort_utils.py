@@ -45,7 +45,11 @@ def check_num_pages(path):
     :param path: путь к файлу
     :return: лист - страниц, листов
     """
-    doc = pdfplumber.open(path)
+    try:
+        doc = pdfplumber.open(path)
+    except:
+        print('cant open non pdf for check pages')
+        return [0, 0]
     n_pages = len(doc.pages)
     if n_pages == 0:
         n_pages += 1
@@ -77,6 +81,10 @@ def concat_pdfs(list_of_filepaths, is_del):
 
     :return: str путь к обьединенному пдф
     """
+    for i in list_of_filepaths:
+        if not i.endswith('.pdf'):
+            print('non pdf found')
+            return list_of_filepaths[0]
     object_class = gateway.jvm.java.lang.String
     MyJavaArray = gateway.new_array(object_class, len(list_of_filepaths))
     for i in range(len(list_of_filepaths)):
@@ -97,6 +105,7 @@ def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'
     :param currentprinter: название принтера
     """
     if not filepath.endswith('.pdf'):
+        print('cant print non pdf file(print_file error)')
         return 0
     if mode == 1:
         try:
@@ -193,8 +202,13 @@ def fitPdfInA4(pdfpath):
     :param pdfpath: путь к файлу
     :return: outpath - путь к сформированному temp-файлу
     """
-    writer = PdfFileWriter()
-    pdf = PdfFileReader(pdfpath, strict=False)
+    try:
+        writer = PdfFileWriter()
+        pdf = PdfFileReader(pdfpath, strict=False)
+    except Exception as e:
+        print(e)
+        print('cant open given path (fitPdfInA4 error)')
+        return pdfpath
     for page in pdf.pages:
         writer.addPage(page)
     fd, tempoutpath = tempfile.mkstemp('.pdf')
@@ -317,7 +331,6 @@ def office2pdf(origfile):
         print(e)
         print('cant convert office file ', origfile)
         return origfile
-
     try:
         os.remove(origfile)
     except:

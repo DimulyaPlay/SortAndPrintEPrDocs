@@ -3,6 +3,7 @@ from tkinter import *
 import win32com.client
 from scrollable_frame import VerticalScrolledFrame
 from sort_utils import *
+import copy
 
 
 class MessageHandler:
@@ -134,7 +135,8 @@ class MessageHandler:
             print_button.unbind("<Button-1>")
             print_button.config(relief=SUNKEN)
             print_button.update()
-            group_print_list_sorted = group_print_list.copy()
+            group_cycle_real = group_cycle[1:]
+            group_cycle_print_list_sorted = copy.deepcopy(group_cycle[1:])  # other methods can't make indipendent copy
             for msg in self.handle_keys:
                 if printcbVariables[msg].get():
                     try:
@@ -152,10 +154,15 @@ class MessageHandler:
                     except:
                         continue
                     if printcbVariables[att[0]].get():
-                        if att[0] in group_print_list:
-                            group_print_list.remove(att[0])
-                            if not group_print_list:
-                                groupped_file = concat_pdfs(group_print_list_sorted, False)
+                        doc_n_group = None
+                        for n, group in enumerate(group_cycle_real):
+                            if att[0] in group:
+                                doc_n_group = n
+                                break
+                        if doc_n_group is not None:
+                            group_cycle_real[doc_n_group].remove(att[0])
+                            if not group_cycle_real[doc_n_group]:
+                                groupped_file = concat_pdfs(group_cycle_print_list_sorted[doc_n_group], False)
                                 print_file(groupped_file, rbVariables[att[0]].get(), current_config.default_printer,
                                            int(att[2] / rbVariables[att[0]].get()), entryCopyVariables[att[0]].get(),
                                            att[1])
@@ -181,18 +188,35 @@ class MessageHandler:
 
         def change_concat_category(e):
             widget = e.widget
+            forward = False if e.num == 3 else True
             keys = list(lb1.keys())
             values = list(lb1.values())
             found_index = values.index(widget)
             doc_for_concat = keys[found_index]
-            if doc_for_concat in group_print_list:
-                group_print_list.remove(doc_for_concat)
-                widget.config(background='SystemButtonFace')
-                widget.update()
-                return
-            group_print_list.append(doc_for_concat)
-            widget.config(background='orange')
-            widget.update()
+            doc_n_group = None
+            for n, group in enumerate(group_cycle):
+                if doc_for_concat in group:
+                    doc_n_group = n
+                    break
+            if doc_n_group is None:
+                group_cycle[0].append(doc_for_concat)
+            for n, group in enumerate(group_cycle):
+                if doc_for_concat in group:
+                    group.remove(doc_for_concat)
+                    if n == 9 and forward:
+                        group_cycle[0].append(doc_for_concat)
+                        widget.config(background=group_colors[0])
+                        widget.update()
+                        break
+                    if forward and 9 != n:
+                        group_cycle[n + 1].append(doc_for_concat)
+                        widget.config(background=group_colors[n + 1])
+                        widget.update()
+                    if not forward:
+                        group_cycle[n - 1].append(doc_for_concat)
+                        widget.config(background=group_colors[n - 1])
+                        widget.update()
+                    break
 
         MAXHEIGHT = 650
         height = 1
@@ -223,7 +247,20 @@ class MessageHandler:
         entryCopyVariables = {}
         lb1 = {}
         printcbVariables = {}
-        group_print_list = []
+        group0_print_list = []
+        group1_print_list = []
+        group2_print_list = []
+        group3_print_list = []
+        group4_print_list = []
+        group5_print_list = []
+        group6_print_list = []
+        group7_print_list = []
+        group8_print_list = []
+        group9_print_list = []
+        group_cycle = [group0_print_list, group1_print_list, group2_print_list, group3_print_list, group4_print_list,
+                       group5_print_list, group6_print_list, group7_print_list, group8_print_list, group9_print_list]
+        group_colors = ['SystemButtonFace', 'aquamarine1', 'brown2', 'deep sky blue', 'indian red', 'dark slate gray',
+                        'cyan3', 'SeaGreen1', 'firebrick1', 'DarkOrchid1', 'DodgerBlue2']
         prntchballvar = BooleanVar()
         prntchballvar.set(1)
         prntchball = Checkbutton(container, variable=prntchballvar, command=check_all_chbtns)
@@ -270,7 +307,8 @@ class MessageHandler:
                 prntchb.grid(column=0, row=currentrow, sticky=W, padx=padx / 2)
                 lb1[current_key] = Label(container, text=current_name, font='TkFixedFont')
                 lb1[current_key].grid(column=1, row=currentrow, sticky=W, padx=padx)
-                lb1[current_key].bind('<Double-Button-1>', lambda event, a=current_key: os.startfile(a))
+                lb1[current_key].bind('<Button-2>', lambda event, a=current_key: os.startfile(a))
+                lb1[current_key].bind('<Button-1>', change_concat_category)
                 lb1[current_key].bind('<Button-3>', change_concat_category)
                 lb2 = Label(container, text=current_pages)
                 lb2.grid(column=2, row=currentrow, sticky=W, padx=padx)
