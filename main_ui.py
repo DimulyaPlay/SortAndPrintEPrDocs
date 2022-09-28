@@ -31,7 +31,12 @@ statfile_path = os.path.join(documents_path, stats_name)  # полный пут�
 config_path = os.path.join(documents_path, config_name)  # полный путь файла конфигурации
 iconpath = os.path.join(application_path, iconname)
 
-current_config = config_file(config_path)
+try:
+    current_config = config_file(config_path)
+except:
+    os.remove(config_path)
+    current_config = config_file(config_path)
+    messagebox.showinfo('Внимание', 'Версия конфигурационного файла устарела и была сброшена до настроек по умолчанию')
 
 if current_config.save_stat == 'yes':
     stat_writer = stat_loader(statfile_path)

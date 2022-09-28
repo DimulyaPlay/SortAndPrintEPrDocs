@@ -10,12 +10,10 @@ class config_file:
         self.config_path = config_filepath
         self.default_config = {'no_protocols': 'no', 'delete_zip': 'no', 'paper_eco_mode': 'yes',
                                'print_directly': 'yes', 'save_stat': 'yes',
-                               'default_printer': win32print.GetDefaultPrinter(), 'opacity': 60}
+                               'default_printer': win32print.GetDefaultPrinter(), 'opacity': 60,
+                               'concat_protocols': 'no'}
         self.readcreateconfig()
-        try:
-            self.read_vars_from_config()
-        except configparser.NoOptionError as e:
-            raise configparser.NoOptionError('Конфигурационный файл устарел, удалите его, что-бы создался новый') from e
+        self.read_vars_from_config()
 
     def readcreateconfig(self):
         """
@@ -40,6 +38,7 @@ class config_file:
         self.current_config['DEFAULT']['default_printer'] = self.default_printer  # Принтер по умолчанию для программы
         self.current_config['DEFAULT']["opacity"] = self.gui_opacity  # Прозрачность основного окна
         self.current_config['DEFAULT']["no_protocols"] = self.no_protocols  # не обрабатывать протоколы
+        self.current_config['DEFAULT']["concat_protocols"] = self.concat_protocols
         with open(self.config_path, 'w') as configfile:
             self.current_config.write(configfile)
 
@@ -55,3 +54,4 @@ class config_file:
                                                        'default_printer')  # Принтер по умолчанию для программы
         self.gui_opacity = self.current_config.get('DEFAULT', "opacity")  # Прозрачность основного окна
         self.no_protocols = self.current_config.get('DEFAULT', 'no_protocols')
+        self.concat_protocols = self.current_config.get('DEFAULT', 'concat_protocols')

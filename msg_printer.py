@@ -189,8 +189,8 @@ class MessageHandler:
         def change_concat_category(e):
             widget = e.widget
             forward = False if e.num == 3 else True
-            keys = list(lb1.keys())
-            values = list(lb1.values())
+            keys = list(but1.keys())
+            values = list(but1.values())
             found_index = values.index(widget)
             doc_for_concat = keys[found_index]
             doc_n_group = None
@@ -233,18 +233,19 @@ class MessageHandler:
                     if width < att_len:
                         width = att_len
                 height += 1
-        height = height * 25
+        height = (height * 25) + 10
         if width < 26:
             width = 26
         if width > 68:
             width = 68
-        width = (width * 8) + 215
+        width = (width * 8) + 230
         if height > MAXHEIGHT:
             height = MAXHEIGHT
         container = VerticalScrolledFrame(dialog, height=height, width=width)
         container.pack()
         rbVariables = {}
         entryCopyVariables = {}
+        but1 = {}
         lb1 = {}
         printcbVariables = {}
         group0_print_list = []
@@ -265,12 +266,12 @@ class MessageHandler:
         prntchballvar.set(1)
         prntchball = Checkbutton(container, variable=prntchballvar, command=check_all_chbtns)
         prntchball.grid(column=0, row=0)
-        Label(container, text='Название документа/тема').grid(column=1, row=0)
-        Label(container, text='Страниц').grid(column=2, row=0)
-        Label(container, text='1').grid(column=3, row=0)
-        Label(container, text='2').grid(column=4, row=0)
-        Label(container, text='4').grid(column=5, row=0)
-        Label(container, text='Коп').grid(column=6, row=0)
+        Label(container, text='Название документа/тема').grid(column=2, row=0)
+        Label(container, text='Страниц').grid(column=3, row=0)
+        Label(container, text='1').grid(column=4, row=0)
+        Label(container, text='2').grid(column=5, row=0)
+        Label(container, text='4').grid(column=6, row=0)
+        Label(container, text='Коп').grid(column=7, row=0)
         currentrow = 1
         for filepath in self.handle_keys:
             subject = self.handled_messages[filepath].subject if self.handled_messages[
@@ -282,12 +283,12 @@ class MessageHandler:
             prntchb.var = printcbVariables[filepath]
             prntchb.grid(column=0, row=currentrow, sticky=W)
             lb1[filepath] = Label(container, text=subject, font='TkFixedFont', fg='blue')
-            lb1[filepath].grid(column=1, row=currentrow, sticky=W)
+            lb1[filepath].grid(column=2, row=currentrow, sticky=W)
             lb1[filepath].bind('<Double-Button-1>', lambda event, a=self.orig_messages[filepath]: os.startfile(a))
             entryCopyVariables[filepath] = StringVar()
             entryCopyVariables[filepath].set(1)
             entryCopies = Entry(container, textvariable=entryCopyVariables[filepath], width=5)
-            entryCopies.grid(column=6, row=currentrow, sticky=W)
+            entryCopies.grid(column=7, row=currentrow, sticky=W)
             currentrow += 1
             for att in self.handled_attachments[filepath]:
                 current_key = att[0]
@@ -296,7 +297,6 @@ class MessageHandler:
                 current_papers = att[3]
                 current_printable = att[4]
                 current_name = current_name if len(current_name) < 58 else current_name[:55] + "..."
-                padx = 10
                 if current_printable:
                     printcbVariables[current_key] = BooleanVar()
                     printcbVariables[current_key].set(1)
@@ -304,29 +304,30 @@ class MessageHandler:
                     prntchb.var = printcbVariables[current_key]
                 else:
                     prntchb = Checkbutton(container, state=DISABLED)
-                prntchb.grid(column=0, row=currentrow, sticky=W, padx=padx / 2)
+                prntchb.grid(column=0, row=currentrow, sticky=W)
+                but1[current_key] = Button(container, width=1, height=1)
+                but1[current_key].grid(column=1, row=currentrow, sticky=E)
+                but1[current_key].bind('<Button>', change_concat_category)
                 lb1[current_key] = Label(container, text=current_name, font='TkFixedFont')
-                lb1[current_key].grid(column=1, row=currentrow, sticky=W, padx=padx)
-                lb1[current_key].bind('<Button-2>', lambda event, a=current_key: os.startfile(a))
-                lb1[current_key].bind('<Button-1>', change_concat_category)
-                lb1[current_key].bind('<Button-3>', change_concat_category)
+                lb1[current_key].grid(column=2, row=currentrow, sticky=W, padx=10)
+                lb1[current_key].bind('<Double-Button-1>', lambda event, a=current_key: os.startfile(a))
                 lb2 = Label(container, text=current_pages)
-                lb2.grid(column=2, row=currentrow, sticky=W, padx=padx)
+                lb2.grid(column=3, row=currentrow, sticky=N)
                 rbVariables[current_key] = IntVar()
                 rbVariables[current_key].set(1)
                 rb1 = Radiobutton(container, variable=rbVariables[current_key], value=1, command=update_num_pages)
                 rb1.var = rbVariables[current_key]
-                rb1.grid(column=3, row=currentrow, sticky=W)
+                rb1.grid(column=4, row=currentrow, sticky=W)
                 rb2 = Radiobutton(container, variable=rbVariables[current_key], value=2, command=update_num_pages)
                 rb2.var = rbVariables[current_key]
-                rb2.grid(column=4, row=currentrow, sticky=W)
+                rb2.grid(column=5, row=currentrow, sticky=W)
                 rb4 = Radiobutton(container, variable=rbVariables[current_key], value=4, command=update_num_pages)
                 rb4.var = rbVariables[current_key]
-                rb4.grid(column=5, row=currentrow, sticky=W)
+                rb4.grid(column=6, row=currentrow, sticky=W)
                 entryCopyVariables[current_key] = StringVar()
                 entryCopyVariables[current_key].set(1)
                 entryCopies = Entry(container, textvariable=entryCopyVariables[current_key], width=5)
-                entryCopies.grid(column=6, row=currentrow, sticky=W)
+                entryCopies.grid(column=7, row=currentrow, sticky=W)
                 currentrow += 1
         bottom_actions = Frame(dialog)
         bottom_actions.pack()

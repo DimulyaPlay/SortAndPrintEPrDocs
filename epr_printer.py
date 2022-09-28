@@ -26,9 +26,9 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         for i in range(copies):
             for fp, prntcbvar in printcbVariables.items():
                 if prntcbvar.get():
-                    to_queue_time = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
-                                               int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
-                                               entryCopyVariables[fp].get(), os.path.basename(fp))
+                    to_queue_time, _ = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
+                                                  int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
+                                                  entryCopyVariables[fp].get(), os.path.basename(fp), False)
                     stat_writer.statdict['Постановка в очередь заняла'] += to_queue_time
                     if i + 1 == copies:
                         prntcbvar.set(0)
@@ -53,6 +53,16 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         update_num_pages()
         print_button.config(relief=RAISED)
         print_button.bind("<Button-1>", apply_print)
+
+    def preview_all(e):
+        files_for_concat = []
+        for fp, prntcbvar in printcbVariables.items():
+            if prntcbvar.get():
+                _, fps = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
+                                    int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
+                                    entryCopyVariables[fp].get(), os.path.basename(fp), True)
+                files_for_concat.extend(fps)
+        os.startfile(concat_pdfs(files_for_concat, False))
 
     def open_folder(e):
         open_folder_b.unbind("<Button-1>")
@@ -159,6 +169,7 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
     print_button = Label(bottom_actions, text=" Печать ", borderwidth=2, relief=RAISED)
     print_button.grid(column=2, row=0, sticky=S, padx=5, pady=2)
     print_button.bind("<Button-1>", apply_print)
+    print_button.bind("<Button-3>", preview_all)
     sum_pages = Label(bottom_actions, textvariable=len_pages)
     sum_pages.grid(column=3, row=0, sticky=S, padx=5, pady=2)
     n_copies = Label(bottom_actions, text="Копий:")

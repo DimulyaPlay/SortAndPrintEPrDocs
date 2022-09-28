@@ -93,10 +93,11 @@ def concat_pdfs(list_of_filepaths, is_del):
     return out
 
 
-def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'):
+def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty', preview=False):
     """
     Отправка документа в очередь печати с заданными параметрами
 
+    :param preview: print on not print
     :param copies: копий
     :param n_pages: количество страниц в пдф
     :param fileName: имя, которое сохранится в логе spooler
@@ -126,11 +127,12 @@ def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty'
         copies = int(copies)
     except:
         copies = 1
-    for i in range(copies):
-        for filepath in filepaths:
-            gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
+    if not preview:
+        for i in range(copies):
+            for filepath in filepaths:
+                gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
     deltatime = time.time() - starttime
-    return deltatime
+    return deltatime, filepaths
 
 
 def parse_names(names: str):

@@ -81,6 +81,7 @@ class main_sorter:
 
         queue_files = []
         queue_num_files = []
+        protocols_for_concat = []
         self.num_protocols_eco = {}
         counter = 0
         all_keys = sorted(queue.keys())
@@ -95,8 +96,12 @@ class main_sorter:
                 if i + 1 in all_keys:  # Если экомод, то проверяем есть ли протокол для файла
                     if queue[i + 1].startswith(
                             'Protokol_proverki_fayla_'):  # Если следующий протокол, то склеиваем с текущим, если нет, то хз??
-                        merged_file = concat_pdfs(['{0}\\{1}'.format(foldername, queue[i]),
-                                                   '{0}\\{1}'.format(foldername, queue[i + 1])], True)
+                        if self.config.concat_protocols == 'no':
+                            merged_file = concat_pdfs(['{0}\\{1}'.format(foldername, queue[i]),
+                                                       '{0}\\{1}'.format(foldername, queue[i + 1])], True)
+                        else:
+                            merged_file = '{0}\\{1}'.format(foldername, queue[i])
+                            protocols_for_concat.append('{0}\\{1}'.format(foldername, queue[i + 1]))
                         queue_files.append(merged_file)
                         numered_file = foldername + '\\' + f'{counter:02}_' + queue[i]
                         queue_num_files.append(numered_file)
@@ -116,6 +121,14 @@ class main_sorter:
                 self.num_pages[j] = check_num_pages(j)
                 self.num_protocols_eco[j] = int(self.num_pages[j][0] % 2 != 1)
                 self.files_for_print.append(j)
+        if self.config.concat_protocols == 'yes' and self.config.no_protocols == 'no':
+            protocols_concatenated = concat_pdfs(protocols_for_concat, True)
+            new_name = foldername + '\\Protocols.pdf'
+            os.rename(protocols_concatenated, new_name)
+            self.files_for_print.append(new_name)
+            self.num_pages[new_name] = check_num_pages(new_name)
+            self.num_protocols_eco[new_name] = int(self.num_pages[new_name][0] % 2 != 1)
+
         if self.config.save_stat == 'yes':
             docnumber = os.path.basename(givenpath).split('_', 1)[0]
             now = datetime.now()
