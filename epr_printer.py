@@ -58,7 +58,8 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         files_for_concat = []
         for fp, prntcbvar in printcbVariables.items():
             if prntcbvar.get():
-                _, fps = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
+                _, fps = print_file(fp, rbVariables[fp].get(),
+                                    current_config.default_printer,
                                     int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
                                     entryCopyVariables[fp].get(), os.path.basename(fp), True)
                 files_for_concat.extend(fps)

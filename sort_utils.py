@@ -85,6 +85,8 @@ def concat_pdfs(list_of_filepaths, is_del):
         if not i.endswith('.pdf'):
             print('non pdf found')
             return list_of_filepaths[0]
+    # if len(list_of_filepaths) == 1:
+    #     return list_of_filepaths[0]
     object_class = gateway.jvm.java.lang.String
     MyJavaArray = gateway.new_array(object_class, len(list_of_filepaths))
     for i in range(len(list_of_filepaths)):
@@ -349,3 +351,7 @@ def office2pdf(origfile):
 
 def convertImageWithJava(fp):
     return gateway.entry_point.generatePDFFromImage(fp)
+
+
+def addStampWithJava(fp, numAppeal, numDoc):
+    return gateway.entry_point.addStamp(fp, numAppeal, str(numDoc))
