@@ -26,6 +26,8 @@ def open_settings(root, current_config, statfile_path, iconpath, stat_loader, co
     opt7noProtocols.set(current_config.no_protocols)
     opt8allProtocolsIntoOne = StringVar()
     opt8allProtocolsIntoOne.set(current_config.concat_protocols)
+    opt9addStamp = StringVar()
+    opt9addStamp.set(current_config.add_stamp)
 
     def apply(e=current_config):
         # Set main class vars from checkbuttons
@@ -37,6 +39,7 @@ def open_settings(root, current_config, statfile_path, iconpath, stat_loader, co
         current_config.gui_opacity = opt6Opacity.get()
         current_config.no_protocols = opt7noProtocols.get()
         current_config.concat_protocols = opt8allProtocolsIntoOne.get()
+        current_config.add_stamp = opt9addStamp.get()
         if current_config.save_stat == 'yes':
             stat_writer = stat_loader(statfile_path)
         root.attributes('-alpha', (int(current_config.gui_opacity) / 100))
@@ -58,6 +61,8 @@ def open_settings(root, current_config, statfile_path, iconpath, stat_loader, co
     Checkbutton(settings, text="Без протоколов", variable=opt7noProtocols, onvalue='yes', offvalue='no',
                 command=apply).pack(anchor=W)
     Checkbutton(settings, text="Сводный протокол", variable=opt8allProtocolsIntoOne, onvalue='yes', offvalue='no',
+                command=apply).pack(anchor=W)
+    Checkbutton(settings, text="Добавлять штамп", variable=opt9addStamp, onvalue='yes', offvalue='no',
                 command=apply).pack(anchor=W)
     Scale(settings, from_=10, to=100, orient=HORIZONTAL, variable=opt6Opacity, command=apply).pack(anchor=W,
                                                                                                    fill=X)

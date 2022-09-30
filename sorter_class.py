@@ -87,15 +87,12 @@ class main_sorter:
         # self.config.add_stamp == 'yes'
         all_keys = sorted(queue.keys())
         for i in sorted(queue.keys()):
-            if self.config.paperecomode == "no":  # Если не экомод просто нумеруем файлы и протоколы, подставляя переменную count
+            if self.config.paperecomode == "no" and self.config.concat_protocols == 'no':  # Если не экомод просто нумеруем файлы и протоколы, подставляя переменную count
                 queue_files.append('{0}\\{1}'.format(foldername, queue[i]))
                 self.num_protocols_eco[foldername + '\\' + f'{counter:02}_' + queue[i]] = 0
-                if not queue[i].startswith('Protokol_proverki_fayla_'):
-                    queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
-                    if os.path.exists('{0}\\{1}'.format(foldername, queue[i])):
-                        counter += 1
-                else:
-                    protocols_for_concat.append(foldername + '\\' + queue[i])
+                queue_num_files.append(foldername + '\\' + f'{counter:02}_' + queue[i])
+                if os.path.exists('{0}\\{1}'.format(foldername, queue[i])):
+                    counter += 1
             else:
                 if i + 1 in all_keys:  # Если экомод, то проверяем есть ли протокол для файла
                     if queue[i + 1].startswith(
@@ -125,23 +122,23 @@ class main_sorter:
                 self.num_pages[j] = check_num_pages(j)
                 self.num_protocols_eco[j] = int(self.num_pages[j][0] % 2 != 1)
                 self.files_for_print.append(j)
-        # if self.config.add_stamp == 'yes':
-        counter_stamp = -1
-        for i in range(len(self.files_for_print)):
-            if counter_stamp < 0:
-                num_doc = 'Квитанция'
-            elif counter_stamp == 0:
-                num_doc = 'Суть заявления'
-            elif counter_stamp > 0:
-                num_doc = 'Приложение ' + str(counter_stamp)
-            if not os.path.basename(self.files_for_print[i])[3:].startswith('Protokol_proverki_fayla_'):
-                if self.num_pages[self.files_for_print[i]][0] > 10:
-                    filepaths = splitBy10(self.files_for_print[i], self.num_pages[self.files_for_print[i]][0])
-                    filepaths[0] = addStampWithJava(filepaths[0], num_appeal, num_doc)
-                    os.replace(concat_pdfs(filepaths, True), self.files_for_print[i])
-                else:
-                    self.files_for_print[i] = addStampWithJava(self.files_for_print[i], num_appeal, num_doc)
-                counter_stamp += 1
+        if self.config.add_stamp == 'yes':
+            counter_stamp = -1
+            for i in range(len(self.files_for_print)):
+                if counter_stamp < 0:
+                    num_doc = 'Квитанция'
+                elif counter_stamp == 0:
+                    num_doc = 'Суть заявления'
+                elif counter_stamp > 0:
+                    num_doc = 'Приложение ' + str(counter_stamp)
+                if not os.path.basename(self.files_for_print[i])[3:].startswith('Protokol_proverki_fayla_'):
+                    if self.num_pages[self.files_for_print[i]][0] > 10:
+                        filepaths = splitBy10(self.files_for_print[i], self.num_pages[self.files_for_print[i]][0])
+                        filepaths[0] = addStampWithJava(filepaths[0], num_appeal, num_doc)
+                        os.replace(concat_pdfs(filepaths, True), self.files_for_print[i])
+                    else:
+                        self.files_for_print[i] = addStampWithJava(self.files_for_print[i], num_appeal, num_doc)
+                    counter_stamp += 1
         if self.config.concat_protocols == 'yes' and self.config.no_protocols == 'no':
             protocols_concatenated = concat_pdfs(protocols_for_concat, True)
             new_name = foldername + '\\Protocols.pdf'

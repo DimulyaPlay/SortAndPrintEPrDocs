@@ -11,7 +11,7 @@ class config_file:
         self.default_config = {'no_protocols': 'no', 'delete_zip': 'no', 'paper_eco_mode': 'yes',
                                'print_directly': 'yes', 'save_stat': 'yes',
                                'default_printer': win32print.GetDefaultPrinter(), 'opacity': 60,
-                               'concat_protocols': 'no'}
+                               'concat_protocols': 'no', 'add_stamp': 'no'}
         self.readcreateconfig()
         self.read_vars_from_config()
 
@@ -39,6 +39,7 @@ class config_file:
         self.current_config['DEFAULT']["opacity"] = self.gui_opacity  # Прозрачность основного окна
         self.current_config['DEFAULT']["no_protocols"] = self.no_protocols  # не обрабатывать протоколы
         self.current_config['DEFAULT']["concat_protocols"] = self.concat_protocols
+        self.current_config['DEFAULT']["add_stamp"] = self.add_stamp
         with open(self.config_path, 'w') as configfile:
             self.current_config.write(configfile)
 
@@ -55,3 +56,4 @@ class config_file:
         self.gui_opacity = self.current_config.get('DEFAULT', "opacity")  # Прозрачность основного окна
         self.no_protocols = self.current_config.get('DEFAULT', 'no_protocols')
         self.concat_protocols = self.current_config.get('DEFAULT', 'concat_protocols')
+        self.add_stamp = self.current_config.get('DEFAULT', 'add_stamp')
