@@ -34,7 +34,8 @@ iconpath = os.path.join(application_path, iconname)
 try:
     current_config = config_file(config_path)
 except:
-    os.remove(config_path)
+    if os.path.exists(config_path):
+        os.remove(config_path)
     current_config = config_file(config_path)
     messagebox.showinfo('Внимание', 'Версия конфигурационного файла устарела и была сброшена до настроек по умолчанию')
 
