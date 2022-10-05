@@ -115,7 +115,6 @@ class main_sorter:
                         self.num_protocols_eco[numered_file] = 0
                         counter += 1
         self.files_for_print = []
-        print(protocols_for_concat)
         for i, j in zip(queue_files, queue_num_files):
             if os.path.exists(i):
                 os.replace(i, j)

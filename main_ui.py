@@ -36,9 +36,16 @@ try:
 except:
     if os.path.exists(config_path):
         os.remove(config_path)
-    current_config = config_file(config_path)
-    messagebox.showinfo('Внимание', 'Версия конфигурационного файла устарела и была сброшена до настроек по умолчанию')
-
+        current_config = config_file(config_path)
+        messagebox.showinfo('Внимание',
+                            'Версия конфигурационного файла устарела и была сброшена до настроек по умолчанию.')
+    else:
+        config_path = os.path.join(application_path, config_name)
+        current_config = config_file(config_path)
+        statfile_path = os.path.join(application_path, stats_name)
+        messagebox.showinfo('Внимание',
+                            'Невозможно создать конфиг в папке Документы, конфиг создан в папке с программой.')
+    pass
 if current_config.save_stat == 'yes':
     stat_writer = stat_loader(statfile_path)
     sorterClass = main_sorter(current_config, stat=stat_writer)
@@ -58,17 +65,28 @@ def main_drop(event):
         path = event.data[1:-1]
     else:
         path = event.data
-    if path[-4:] != '.zip':
+    if path.endswith('.msg'):
         if not outlook_connected:
             messagebox.showwarning("Ошибка", 'Не удалось соединиться с Outlook. Работа только с ЭПр')
         else:
             msgnames = parse_names(event.data)
-            msg_handler.handle_messages(msgnames)
-            msg_handler.print_dialog_msg(root, current_config, iconpath)
+            msgnames = [i if i.endswith('.msg') and i.startswith('C:') else '' for i in msgnames]
+            try:
+                msg_handler.handle_messages(msgnames)
+                msg_handler.print_dialog_msg(root, current_config, iconpath)
+            except Exception as e:
+                print(e)
+                messagebox.showwarning('Упс', f'Не удалось обработать сообщения\n{e}')
+    elif path.endswith('.zip'):
+        try:
+            sorterClass.agregate_file(path)
+            if current_config.print_directly == "yes":
+                print_dialog(root, current_config, sorterClass, stat_writer, iconpath)
+        except Exception as e:
+            print(e)
+            messagebox.showwarning('Упс', f'Не удалось обработать архив\n{e}')
     else:
-        sorterClass.agregate_file(path)
-        if current_config.print_directly == "yes":
-            print_dialog(root, current_config, sorterClass, stat_writer, iconpath)
+        messagebox.showwarning('Упс', 'Данный тип файлов не поддерживается')
     dropzone.configure(text='+', foreground='black')
     root.attributes('-alpha', (int(current_config.gui_opacity) / 100))
 

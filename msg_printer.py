@@ -85,6 +85,8 @@ class MessageHandler:
         self.handled_attachments = {}
         self.orig_messages = {}
         for i in msgs:
+            if i == '':
+                continue
             fd, outpath = tempfile.mkstemp('.msg')
             os.close(fd)
             shutil.copy2(i, outpath)

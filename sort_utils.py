@@ -213,19 +213,19 @@ def fitPdfInA4(pdfpath):
         print(e)
         print('cant open given path (fitPdfInA4 error)')
         return pdfpath
-    for page in pdf.pages:
-        writer.addPage(page)
-    fd, tempoutpath = tempfile.mkstemp('.pdf')
-    os.close(fd)
-    with open(tempoutpath, "wb") as fp:
-        writer.write(fp)
-    pdf = PdfFileReader(tempoutpath)
     new_pdf = PdfFileWriter()
     for page in pdf.pages:
+        # print(page.get('/Rotate'))
         page_width = page.mediaBox.getWidth()
         page_height = page.mediaBox.getHeight()
         if page_width > page_height:
+            # print('album')
+            # print('before ', page.get('/Rotate'))
             page.rotateClockwise(270)
+            # print('after ', page.get('/Rotate'))
+        # else:
+        #     print('portrait')
+        #     print(page.get('/Rotate'))
         page_width = page.mediaBox.getWidth()
         page_height = page.mediaBox.getHeight()
         if page_width > a4small[0] or page_height > a4small[1]:
