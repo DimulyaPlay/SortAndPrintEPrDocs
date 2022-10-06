@@ -115,6 +115,7 @@ class main_sorter:
                         self.num_protocols_eco[numered_file] = 0
                         counter += 1
         self.files_for_print = []
+        self.files_for_print_stamps = {}
         for i, j in zip(queue_files, queue_num_files):
             if os.path.exists(i):
                 os.replace(i, j)
@@ -131,12 +132,7 @@ class main_sorter:
                 elif counter_stamp > 0:
                     num_doc = 'Приложение ' + str(counter_stamp)
                 if not os.path.basename(self.files_for_print[i])[3:].startswith('Protokol_proverki_fayla_'):
-                    if self.num_pages[self.files_for_print[i]][0] > 10:
-                        filepaths = splitBy10(self.files_for_print[i], self.num_pages[self.files_for_print[i]][0])
-                        filepaths[0] = addStampWithJava(filepaths[0], num_appeal, num_doc)
-                        os.replace(concat_pdfs(filepaths, True), self.files_for_print[i])
-                    else:
-                        self.files_for_print[i] = addStampWithJava(self.files_for_print[i], num_appeal, num_doc)
+                    self.files_for_print_stamps[self.files_for_print[i]] = [num_appeal, num_doc]
                     counter_stamp += 1
         if self.config.concat_protocols == 'yes' and self.config.no_protocols == 'no':
             protocols_concatenated = concat_pdfs(protocols_for_concat, True)

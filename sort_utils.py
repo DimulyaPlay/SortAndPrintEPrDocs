@@ -85,8 +85,6 @@ def concat_pdfs(list_of_filepaths, is_del):
         if not i.endswith('.pdf'):
             print('non pdf found')
             return list_of_filepaths[0]
-    # if len(list_of_filepaths) == 1:
-    #     return list_of_filepaths[0]
     object_class = gateway.jvm.java.lang.String
     MyJavaArray = gateway.new_array(object_class, len(list_of_filepaths))
     for i in range(len(list_of_filepaths)):
@@ -215,17 +213,12 @@ def fitPdfInA4(pdfpath):
         return pdfpath
     new_pdf = PdfFileWriter()
     for page in pdf.pages:
-        # print(page.get('/Rotate'))
         page_width = page.mediaBox.getWidth()
         page_height = page.mediaBox.getHeight()
         if page_width > page_height:
-            # print('album')
-            # print('before ', page.get('/Rotate'))
-            page.rotateClockwise(270)
-            # print('after ', page.get('/Rotate'))
-        # else:
-        #     print('portrait')
-        #     print(page.get('/Rotate'))
+            new_page = PyPDF2.pdf.PageObject.createBlankPage(width=page_height, height=page_width)
+            new_page.mergeRotatedScaledTranslatedPage(page, rotation=90, scale=1.0, tx=page_height, ty=0)
+            page = new_page
         page_width = page.mediaBox.getWidth()
         page_height = page.mediaBox.getHeight()
         if page_width > a4small[0] or page_height > a4small[1]:

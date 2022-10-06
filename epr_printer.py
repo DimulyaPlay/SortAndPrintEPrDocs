@@ -26,6 +26,15 @@ def print_dialog(root, current_config, sorterClass, stat_writer, iconpath):
         for i in range(copies):
             for fp, prntcbvar in printcbVariables.items():
                 if prntcbvar.get():
+                    if self.config.add_stamp == 'yes':
+                        print('adding stamps')
+                        num_appeal, num_doc = sorterClass.files_for_print_stamps[fp]
+                        if int(sorterClass.num_pages[fp][0]) > 10:
+                            filepaths = splitBy10(fp, int(sorterClass.num_pages[fp][0]))
+                            filepaths[0] = addStampWithJava(filepaths[0], num_appeal, num_doc)
+                            os.replace(concat_pdfs(filepaths, True), fp)
+                        else:
+                            fp = addStampWithJava(fp, num_appeal, num_doc)
                     to_queue_time, _ = print_file(fp, rbVariables[fp].get(), current_config.default_printer,
                                                   int(sorterClass.num_pages[fp][0] / rbVariables[fp].get()),
                                                   entryCopyVariables[fp].get(), os.path.basename(fp), False)

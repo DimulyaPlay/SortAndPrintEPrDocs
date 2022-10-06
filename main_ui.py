@@ -65,6 +65,7 @@ def main_drop(event):
         path = event.data[1:-1]
     else:
         path = event.data
+    print(path)
     if path.endswith('.msg'):
         if not outlook_connected:
             messagebox.showwarning("Ошибка", 'Не удалось соединиться с Outlook. Работа только с ЭПр')
