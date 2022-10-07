@@ -60,4 +60,4 @@ class config_file:
         self.gui_opacity = self.current_config.get('DEFAULT', "opacity")  # Прозрачность основного окна
         self.no_protocols = self.current_config.get('DEFAULT', 'no_protocols')
         self.concat_protocols = self.current_config.get('DEFAULT', 'concat_protocols')
-        self.add_stamp = self.current_config.get('DEFAULT', 'add_stamp')
+        self.add_stamp = self.current_config.get('DEFAULT', 'add_stamp') if not self.date_expired else 'no'

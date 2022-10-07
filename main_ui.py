@@ -22,21 +22,24 @@ try:
     os.startfile(glob.glob(application_path + '//*.jar')[0])
 except IndexError as e:
     raise IndexError('Не обнаружен файл для печати с расширением .jar') from e
+
 documents_path = os.path.expanduser('~/Documents')
 config_name = 'EPr_print_config.ini'  # название файла конфигурации
 stats_name = 'EPr_print_statistics.xlsx'  # название файла статистики
 iconname = 'scales.ico'
-donaters_file_name = 'donaters.txt'
+donaters_file_name = 'l_key.txt'
 printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]  # список принтеров в системе
 statfile_path = os.path.join(documents_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(documents_path, config_name)  # полный путь файла конфигурации
 iconpath = os.path.join(application_path, iconname)
 encoded_file = os.path.join(application_path, donaters_file_name)
 
-key = b' '
+key = b''
 try:
     donaters_lst, exp_date = get_donaters_lst_from_encoded(encoded_file, key)
-except:
+    print('Key accepted, file decrypted')
+except Exception as e:
+    print(e)
     donaters_lst, exp_date = [], '2000/01/01'
 
 try:

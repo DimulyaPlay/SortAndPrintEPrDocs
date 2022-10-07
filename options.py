@@ -9,6 +9,7 @@ curdate = '2022/10/07'
 
 
 def open_settings(root, current_config, statfile_path, iconpath, stat_loader, config_path):
+    donate_state = DISABLED if current_config.date_expired else None
     printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]  # список принтеров в системе
     opt1DelZip = StringVar()
     opt1DelZip.set(current_config.deletezip)
@@ -63,7 +64,7 @@ def open_settings(root, current_config, statfile_path, iconpath, stat_loader, co
     Checkbutton(settings, text="Сводный протокол", variable=opt8allProtocolsIntoOne, onvalue='yes', offvalue='no',
                 command=apply).pack(anchor=W)
     Checkbutton(settings, text="Добавлять штамп", variable=opt9addStamp, onvalue='yes', offvalue='no',
-                command=apply).pack(anchor=W)
+                command=apply, state=donate_state).pack(anchor=W)
     Scale(settings, from_=10, to=100, orient=HORIZONTAL, variable=opt6Opacity, command=apply).pack(anchor=W,
                                                                                                    fill=X)
     Label(settings, text='Непрозрачность интерфейса').pack(anchor=W, fill=X, pady=5)
