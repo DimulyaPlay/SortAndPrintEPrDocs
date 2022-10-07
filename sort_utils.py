@@ -12,10 +12,23 @@ import win32com
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from py4j.java_gateway import JavaGateway
 import py4j.java_collections
+from cryptography.fernet import Fernet
 
 gateway = JavaGateway()
 a4orig = [612.1, 842.0]  # оригинальный формат А4
 a4small = [i * 0.95 for i in a4orig]  # размер для масштабирования под область печати
+
+
+def get_donaters_lst_from_encoded(filename, key):
+    f = Fernet(key)
+    with open(filename, "rb") as file:
+        # read the encrypted data
+        encrypted_data = file.read()
+    decrypted_data = f.decrypt(encrypted_data)
+    decoded_str = decrypted_data.decode()
+    lst_users = decoded_str.split('|')[:-1]
+    expiration_date = decoded_str.split('|')[-1]
+    return lst_users, expiration_date
 
 
 def similar(a: str, b: str) -> float:

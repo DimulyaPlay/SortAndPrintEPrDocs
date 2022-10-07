@@ -26,22 +26,30 @@ documents_path = os.path.expanduser('~/Documents')
 config_name = 'EPr_print_config.ini'  # название файла конфигурации
 stats_name = 'EPr_print_statistics.xlsx'  # название файла статистики
 iconname = 'scales.ico'
+donaters_file_name = 'donaters.txt'
 printer_list = [i[2] for i in win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)]  # список принтеров в системе
 statfile_path = os.path.join(documents_path, stats_name)  # полный путь файла статистики
 config_path = os.path.join(documents_path, config_name)  # полный путь файла конфигурации
 iconpath = os.path.join(application_path, iconname)
+encoded_file = os.path.join(application_path, donaters_file_name)
+
+key = b' '
+try:
+    donaters_lst, exp_date = get_donaters_lst_from_encoded(encoded_file, key)
+except:
+    donaters_lst, exp_date = [], '2000/01/01'
 
 try:
-    current_config = config_file(config_path)
+    current_config = config_file(config_path, donaters_lst, exp_date)
 except:
     if os.path.exists(config_path):
         os.remove(config_path)
-        current_config = config_file(config_path)
+        current_config = config_file(config_path, donaters_lst, exp_date)
         messagebox.showinfo('Внимание',
                             'Версия конфигурационного файла устарела и была сброшена до настроек по умолчанию.')
     else:
         config_path = os.path.join(application_path, config_name)
-        current_config = config_file(config_path)
+        current_config = config_file(config_path, donaters_lst, exp_date)
         statfile_path = os.path.join(application_path, stats_name)
         messagebox.showinfo('Внимание',
                             'Невозможно создать конфиг в папке Документы, конфиг создан в папке с программой.')

@@ -1,13 +1,17 @@
 import configparser
 import os
 from configparser import ConfigParser
-
+import datetime
 import win32print
 
 
 class config_file:
-    def __init__(self, config_filepath):
+    def __init__(self, config_filepath, unlocked_for_usernames, expirationdate):
+        currentdate = datetime.date.today().strftime("%Y/%m/%d")
         self.config_path = config_filepath
+        self.unlocked_for_usernames = unlocked_for_usernames
+        self.date_expired = expirationdate < currentdate
+        print('key expired: ', self.date_expired)
         self.default_config = {'no_protocols': 'no', 'delete_zip': 'no', 'paper_eco_mode': 'yes',
                                'print_directly': 'yes', 'save_stat': 'yes',
                                'default_printer': win32print.GetDefaultPrinter(), 'opacity': 60,
