@@ -3,17 +3,32 @@ import os
 import tempfile
 import time
 from difflib import SequenceMatcher
-
+import zipfile
+import rarfile
+import py7zr
 import PyPDF2
-import patoolib
 import pdfplumber
 import win32com
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from py4j.java_gateway import JavaGateway
+import py4j.java_collections
+from cryptography.fernet import Fernet
 
 gateway = JavaGateway()
 a4orig = [612.1, 842.0]  # оригинальный формат А4
 a4small = [i * 0.95 for i in a4orig]  # размер для масштабирования под область печати
+
+
+def get_donaters_lst_from_encoded(filename, key):
+    f = Fernet(key)
+    with open(filename, "rb") as file:
+        # read the encrypted data
+        encrypted_data = file.read()
+    decrypted_data = f.decrypt(encrypted_data)
+    decoded_str = decrypted_data.decode()
+    lst_users = decoded_str.split('|')[:-1]
+    expiration_date = decoded_str.split('|')[-1]
+    return lst_users, expiration_date
 
 
 def similar(a: str, b: str) -> float:
@@ -43,8 +58,14 @@ def check_num_pages(path):
     :param path: путь к файлу
     :return: лист - страниц, листов
     """
-    doc = pdfplumber.open(path)
+    try:
+        doc = pdfplumber.open(path)
+    except:
+        print('cant open non pdf for check pages')
+        return [0, 0]
     n_pages = len(doc.pages)
+    if n_pages == 0:
+        n_pages += 1
     doc.close()
     pages = n_pages
     papers = int(pages / 2 + 0.9)
@@ -67,30 +88,39 @@ def splitBy10(filepath, n_pages):
     return filepaths
 
 
-def concat_pdfs(master, wingman):
+def concat_pdfs(list_of_filepaths, is_del):
     """
     Конкатенация пдф файлов
-    :param master: путь к первому пдф
 
-    :param wingman: путь ко второму пдф
-
-    :return: str путь к обьединенному пдф, bool сохранен ли лист
+    :return: str путь к обьединенному пдф
     """
-    out = gateway.entry_point.concatenateTwoPdfs(master, wingman)
+    for i in list_of_filepaths:
+        if not i.endswith('.pdf'):
+            print('non pdf found')
+            return list_of_filepaths[0]
+    object_class = gateway.jvm.java.lang.String
+    MyJavaArray = gateway.new_array(object_class, len(list_of_filepaths))
+    for i in range(len(list_of_filepaths)):
+        MyJavaArray[i] = list_of_filepaths[i]
+    out = gateway.entry_point.concatenatePdfs(MyJavaArray, bool(is_del))
     return out
 
 
-def print_file(filepath, mode, currentprinter, n_pages, fileName='Empty'):
+def print_file(filepath, mode, currentprinter, n_pages, copies, fileName='Empty', preview=False):
     """
     Отправка документа в очередь печати с заданными параметрами
 
+    :param preview: print on not print
+    :param copies: копий
     :param n_pages: количество страниц в пдф
     :param fileName: имя, которое сохранится в логе spooler
     :param filepath: путь к файлу
     :param mode: расположение страниц на листе
     :param currentprinter: название принтера
     """
-
+    if not filepath.endswith('.pdf'):
+        print('cant print non pdf file(print_file error)')
+        return 0
     if mode == 1:
         try:
             filepath = fitPdfInA4(filepath)
@@ -106,10 +136,16 @@ def print_file(filepath, mode, currentprinter, n_pages, fileName='Empty'):
         filepaths = splitBy10(filepath, n_pages)
     else:
         filepaths = [filepath]
-    for filepath in filepaths:
-        gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
+    try:
+        copies = int(copies)
+    except:
+        copies = 1
+    if not preview:
+        for i in range(copies):
+            for filepath in filepaths:
+                gateway.entry_point.printToPrinter(filepath, currentprinter, fileName)
     deltatime = time.time() - starttime
-    return deltatime
+    return deltatime, filepaths
 
 
 def parse_names(names: str):
@@ -131,23 +167,45 @@ def parse_names(names: str):
     return nameslist
 
 
-def unpack_archieved_files(path):
+def unpack_archieved_files(path, ext):
     """
     Рекурсивная распаковка архивов
 
+    :param ext: расширение файла
     :param path: путь к архиву
-
     :return: список путей к распакованным файлам, список названий файлов
     """
     tempdir = tempfile.mkdtemp()
     total_files = []
     total_names = []
-    patoolib.extract_archive(path, outdir=tempdir)
+
+    if ext == '.zip':
+        zf = zipfile.ZipFile(path)
+        try:
+            zf.testzip()
+        except:
+            return [path], [os.path.basename(path) + '.lockedArchive']
+        zf.extractall(tempdir)
+
+    if ext == '.rar':
+        rf = rarfile.RarFile(path)
+        try:
+            rf.testrar()
+        except:
+            return [path], [os.path.basename(path) + '.lockedArchive']
+        rf.extractall(tempdir)
+    if ext == '.7z':
+        z7f = py7zr.SevenZipFile(path)
+        if z7f.password_protected:
+            return [path], [os.path.basename(path) + '.lockedArchive']
+        z7f.extractall(tempdir)
+
+    # patoolib.extract_archive(path, outdir=tempdir)
     extracted_files = glob.glob(tempdir + '/**/*', recursive=True)
     total_files.extend(extracted_files)
     for ex_file in extracted_files:
-        if ex_file.lower().endswith(('.zip', '7z', 'rar')):
-            files, names = unpack_archieved_files(ex_file)
+        if ex_file.lower().endswith(('.zip', '.7z', '.rar')):
+            files, names = unpack_archieved_files(ex_file, '.' + ex_file.rsplit('.')[1])
             total_files.extend(files)
     total_names = [os.path.basename(i) for i in total_files]
     return total_files, total_names
@@ -159,21 +217,21 @@ def fitPdfInA4(pdfpath):
     :param pdfpath: путь к файлу
     :return: outpath - путь к сформированному temp-файлу
     """
-    writer = PdfFileWriter()
-    pdf = PdfFileReader(pdfpath, strict=False)
-    for page in pdf.pages:
-        writer.addPage(page)
-    fd, tempoutpath = tempfile.mkstemp('.pdf')
-    os.close(fd)
-    with open(tempoutpath, "wb") as fp:
-        writer.write(fp)
-    pdf = PdfFileReader(tempoutpath)
+    try:
+        writer = PdfFileWriter()
+        pdf = PdfFileReader(pdfpath, strict=False)
+    except Exception as e:
+        print(e)
+        print('cant open given path (fitPdfInA4 error)')
+        return pdfpath
     new_pdf = PdfFileWriter()
     for page in pdf.pages:
         page_width = page.mediaBox.getWidth()
         page_height = page.mediaBox.getHeight()
         if page_width > page_height:
-            page.rotateClockwise(270)
+            new_page = PyPDF2.pdf.PageObject.createBlankPage(width=page_height, height=page_width)
+            new_page.mergeRotatedScaledTranslatedPage(page, rotation=90, scale=1.0, tx=page_height, ty=0)
+            page = new_page
         page_width = page.mediaBox.getWidth()
         page_height = page.mediaBox.getHeight()
         if page_width > a4small[0] or page_height > a4small[1]:
@@ -245,7 +303,7 @@ def fourUP(filepath):
             big_page.mergeScaledTranslatedPage(orig_file.pages[i + 3], scale=0.48, tx=283, ty=10)
         except:
             pass
-    merged_file.addPage(big_page)
+        merged_file.addPage(big_page)
     fd, outpath = tempfile.mkstemp('.pdf')
     os.close(fd)
     with open(outpath, 'wb') as out:
@@ -263,22 +321,31 @@ def office2pdf(origfile):
     convfile = f'{origfile}.pdf'
     wordext = ['.odt', '.rtf', '.doc', '.docx']
     excelext = ['.ods', '.xls', '.xlsx']
-    if ext in wordext:
-        word = win32com.client.Dispatch('Word.Application')
-        doc = word.Documents.Open(origfile)
-        doc.SaveAs(convfile, FileFormat=17)
-        doc.Close()
-        doc = None
-        word.Quit()
-        word = None
-    if ext in excelext:
-        excel = win32com.client.Dispatch("Excel.Application")
-        book = excel.Workbooks.Open(Filename=origfile)
-        book.ExportAsFixedFormat(0, convfile)
-        book = None
-        excel.Quit()
-        excel = None
-    os.remove(origfile)
+    try:
+        if ext in wordext:
+            word = win32com.client.Dispatch('Word.Application')
+            doc = word.Documents.Open(origfile)
+            doc.SaveAs(convfile, FileFormat=17)
+            doc.Close()
+            doc = None
+            word.Quit()
+            word = None
+        if ext in excelext:
+            excel = win32com.client.Dispatch("Excel.Application")
+            book = excel.Workbooks.Open(Filename=origfile)
+            book.ExportAsFixedFormat(0, convfile)
+            book = None
+            excel.Quit()
+            excel = None
+    except Exception as e:
+        print(e)
+        print('cant convert office file ', origfile)
+        return origfile
+    try:
+        os.remove(origfile)
+    except:
+        print('cant remove ', origfile)
+        pass
     neworigfile = f'{origfile.rsplit(".", 1)[0]}.pdf'
     try:
         os.rename(convfile, neworigfile)
@@ -290,3 +357,7 @@ def office2pdf(origfile):
 
 def convertImageWithJava(fp):
     return gateway.entry_point.generatePDFFromImage(fp)
+
+
+def addStampWithJava(fp, numAppeal, numDoc):
+    return gateway.entry_point.addStamp(fp, numAppeal, str(numDoc))
